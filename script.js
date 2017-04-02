@@ -26,24 +26,12 @@ var nButton = document.getElementById('n-button');
 nButton.onclick = function(event) {
   n.value = p.value * q.value;
 }
-/*
-var eButton = document.getElementById('e-button');
-eButton.onclick = function(event) {
-  var k = e.value;
-  if (k == undefined) {
-    alert('No value for E');
-  } else if (factor(z.value).indexOf(k) >= 0) {
-    alert('Bad value for E');
-  } else {
-    alert('Good value for E');
-  }
-}
-*/
+
 var candButton = document.getElementById('cand-button');
 var modTextArea = document.getElementById('mod-candidates');
 candButton.onclick = function(event) {
   var valid = [];
-  for (var i = 2; i < 2000; i++) {
+  for (var i = 2; valid.length < 30; i++) {
     if (i % z.value == 1) {
       valid.push(i);
     }
@@ -59,7 +47,7 @@ factorButton.onclick = function(event) {
   var factors = factor(k.value);
   var result = "";
   for (var i = 0; i < factors.length; i++) {
-    result += factors[i] + " * ";
+    result += factors[i] + ", ";
   }
   result = result.substr(0, result.length - 3)
 
@@ -101,6 +89,65 @@ edButton.onclick = function(event) {
 
 }
 
+var plainTextButton = document.getElementById('msg-plaintext-btn');
+plainTextButton.onclick = function(event) {
+  var plainTextArea = document.getElementById('msg-plaintext');
+  var asciiTextArea = document.getElementById('msg-ascii');
+  var ascii = asciiEncode(plainTextArea.value);
+  var result = "";
+  for (var i = 0; i < ascii.length; i++) {
+    result += ascii[i] + " ";
+  }
+  asciiTextArea.value = result;
+  var encoded = encryptText(ascii);
+  decryptText(encoded);
+}
+
 function isPrime(i) {
   return true
+}
+
+function asciiEncode(text) {
+  var chars = [];
+  for (let i = 0; i < text.length; i++) {
+    var ch = "" + text.charCodeAt(i);
+    chars.push(ch);
+  }
+  return chars;
+}
+
+function powerMod(base, exp, mod) {
+  if ((base < 1) || (exp < 0) || (mod < 1)) {
+    return(-1);
+  }
+  result = 1;
+  while (exp > 0) {
+    if ((exp % 2) == 1) {
+      result = (result * base) % mod;
+    }
+    base = (base * base) % mod;
+    exp = Math.floor(exp / 2);
+  }
+  return result;
+}
+
+function encryptText(ascii) {
+  var encodedTextArea = document.getElementById('msg-encoded');
+  var result = "";
+  var encoded = [];
+  ascii.forEach((ch) => {
+    encoded.push(powerMod(ch, e.value, n.value));
+    result += powerMod(ch, e.value, n.value) + " ";
+  })
+  encodedTextArea.value = result;
+  return encoded;
+}
+
+function decryptText(arr) {
+  var decryptedTextArea = document.getElementById('msg-decrypted');
+  var result = "";
+  arr.forEach((ch) => {
+    result += String.fromCharCode(powerMod(ch, d.value, n.value));
+  })
+  decryptedTextArea.value = result;
 }
