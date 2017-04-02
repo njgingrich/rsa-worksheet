@@ -1,0 +1,33 @@
+<!doctype HTML>
+<html>
+  <title>RSA Worksheet</title>
+  <body>
+    <p>Pick 2 primes, P and Q.</p>
+    <label title="P">P: </label><input type="text" id="p-input"/>
+    <label title="Q">Q: </label><input type="text" id="q-input"/> <button id="pq-button">Check P and Q</button>
+
+    <p>The values of P and Q generate N and Z.</p>
+    <p>Find the number N = P*Q (clock size)</p>
+    <label title="N">N: </label><input type="text" id="n-input"/> <button id="n-button">Calculate N</button>
+    <p>Find the number Z = (P-1)*(Q-1)</p>
+    <label title="Z">Z: </label><input type="text" id="z-input"/> <button id="z-button">Calculate Z</button>
+
+    <p>Then you need to find two numbers E and D such that E*D mod Z = 1.</p>
+    <label title="candidates">Candidates for 1 mod Z: </label>
+    <textarea id="mod-candidates" cols=40 rows=5></textarea>
+    <button id="cand-button">Generate Candidates</button>
+
+    <p>Enter a candidate value of K into the box.</p>
+    <label title="K">K: </label><input type="text" id="k-input"/>
+
+    <p>Factors of K:</p>
+    <input type="text" id="factors-input"/> <button id="factors-button">Generate Factors</button>
+    <br />
+
+    <p>Use factors of candidate K values for E and D. E and D should be relatively prime.</p>
+    <label title="E">E: </label><input type="text" id="e-input"/>
+    <label title="D">D: </label><input type="text" id="d-input"/> <button id="ed-button">Check E and D</button>
+
+    <script src="script.js"></script>
+  </body>
+</html>
