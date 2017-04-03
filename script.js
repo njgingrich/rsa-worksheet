@@ -30,6 +30,10 @@ function warningMessage(formNode, message) {
   sendMessage(formNode, message, "has-warning")
 }
 
+function successMessage(formNode, message) {
+  sendMessage(formNode, message, "has-success")
+}
+
 function sendMessage(formNode, message, warningType) {
   for (var i = 0; i < formNode.childNodes.length; i++) {
     if (formNode.childNodes[i].className != undefined &&
@@ -96,6 +100,13 @@ pqButton.onclick = function(event) {
   }
   // Generate N
   n.value = p.value * q.value;
+  // Generate Z
+  z.value = (p.value - 1) * (q.value - 1);
+
+  successMessage(pForm, 'P is prime.');
+  successMessage(qForm, 'Q is prime.');
+
+  // Will override the success border
   if (n.value < 255) {
     warningMessage(parentForm, "Warning: N < 255, so some ASCII encoding will not work.");
   }
@@ -103,8 +114,6 @@ pqButton.onclick = function(event) {
     warningMessage(parentForm, "Warning: N > sqrt(" + Number.MAX_SAFE_INTEGER + "), so some calculations may overflow.");
   }
 
-  // Generate Z
-  z.value = (p.value - 1) * (q.value - 1);
 
   // Generate candidates for e*d % z = 1
   generateCandidates();
@@ -182,10 +191,17 @@ edButton.onclick = function(event) {
   }
   if (filtered.length > 0) {
     errorMessage(parentForm, 'E and D are not relatively prime.');
+    isValidState = false;
   }
   if ( (e.value * d.value) % z.value != 1) {
     errorMessage(parentForm, '(E*D) mod Z != 1');
+    isValidState = false;
   }
+
+  if (!isValidState) return;
+
+  successMessage(eForm, 'E is relatively prime to Z.')
+  successMessage(dForm, 'D is relatively prime to Z.')
 }
 
 var plainTextButton = document.getElementById('msg-plaintext-btn');
@@ -247,10 +263,19 @@ function encryptText(ascii) {
 }
 
 function decryptText(arr) {
+  clearMessages(document.getElementById('decrypted-form'));
   var decryptedTextArea = document.getElementById('msg-decrypted');
   var result = "";
   arr.forEach((ch) => {
     result += String.fromCharCode(powerMod(ch, d.value, n.value));
   })
   decryptedTextArea.value = result;
+
+  // Check the result
+  var plainTextArea = document.getElementById('msg-plaintext');
+  if (plainTextArea.value != decryptedTextArea.value) {
+    errorMessage(document.getElementById('decrypted-form'), 'Decrpted message does not match original.');
+  } else {
+    successMessage(document.getElementById('decrypted-form'), 'The decrypted message matches the original.');
+  }
 }
