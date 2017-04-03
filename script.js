@@ -1,7 +1,3 @@
-/**
- * https://www.cs.drexel.edu/~introcs/Fa12/notes/10.1_Cryptography/RSAWorksheetv4d.html
- */
-
 var d = document.getElementById('d-input');
 var e = document.getElementById('e-input');
 var k = document.getElementById('k-input');
@@ -10,43 +6,10 @@ var p = document.getElementById('p-input');
 var q = document.getElementById('q-input');
 var z = document.getElementById('z-input');
 
-function clearMessages(node) {
-  for (var i = 0; i < node.childNodes.length; i++) {
-    if (node.childNodes[i].className != undefined &&
-        node.childNodes[i].className.includes('form-control-feedback')) {
-      var notes = node.childNodes[i];
-      node.className = node.className.replace('has-danger', '');
-      node.className = node.className.replace('has-warning', '');
-      notes.innerHTML = '';
-    }        
-  }
-}
-
-function errorMessage(formNode, message) {
-  sendMessage(formNode, message, "has-danger");
-}
-
-function warningMessage(formNode, message) {
-  sendMessage(formNode, message, "has-warning")
-}
-
-function successMessage(formNode, message) {
-  sendMessage(formNode, message, "has-success")
-}
-
-function sendMessage(formNode, message, warningType) {
-  for (var i = 0; i < formNode.childNodes.length; i++) {
-    if (formNode.childNodes[i].className != undefined &&
-        formNode.childNodes[i].className.includes("form-control-feedback")) {
-      var notes = formNode.childNodes[i];
-      if (!formNode.className.includes(warningType)) {
-        formNode.className += " " + warningType;
-      }
-      notes.innerHTML += message + '<br />';
-    }        
-  }
-}
-
+/**
+ * When the various inputs change, the validation states should
+ * be cleared until rechecked with their corresponding button.
+ */
 d.oninput = function() {
   clearMessages(document.getElementById('d-form'));
   clearMessages(document.getElementById('ed-form'));
@@ -62,6 +25,71 @@ p.oninput = function() {
 q.oninput = function() {
   clearMessages(document.getElementById('q-form'));
   clearMessages(document.getElementById('pq-form'));
+}
+
+/**
+ * Clear a node and its children from displaying a validation state (either
+ * success, warning, or error), as well as messages it was displaying.
+ * @param {HTMLElement} node - The DOM node to clear messages from.
+ */
+function clearMessages(node) {
+  for (var i = 0; i < node.childNodes.length; i++) {
+    if (node.childNodes[i].className != undefined &&
+        node.childNodes[i].className.includes('form-control-feedback')) {
+      var notes = node.childNodes[i];
+      node.className = node.className.replace('has-danger', '');
+      node.className = node.className.replace('has-warning', '');
+      notes.innerHTML = '';
+    }        
+  }
+}
+
+/**
+ * Send an error message to a DOM node.
+ * @param {HTMLElement} formNode - The DOM Node to display the message inside.
+ * @param {String} message - The message to display.
+ */
+function errorMessage(formNode, message) {
+  sendMessage(formNode, message, "has-danger");
+}
+
+/**
+ * Send a warning message to a DOM node.
+ * @param {HTMLElement} formNode - The DOM Node to display the message inside.
+ * @param {String} message - The message to display.
+ */
+function warningMessage(formNode, message) {
+  sendMessage(formNode, message, "has-warning")
+}
+
+/**
+ * Send a success message to a DOM node.
+ * @param {HTMLElement} formNode - The DOM Node to display the message inside.
+ * @param {String} message - The message to display.
+ */
+function successMessage(formNode, message) {
+  sendMessage(formNode, message, "has-success")
+}
+
+/**
+ * Add a validation status message to an element. The element must have a child
+ * with the 'form-control-feedback' class to properly display using Bootstrap.
+ * @param {HTMLElement} formNode - The DOM Node to display the message inside.
+ * @param {String} message - The validation message to display.
+ * @param {String} messageType - The type of message to display: 
+ *                               'has-success', 'has-warning', 'has-danger'.
+ */
+function sendMessage(formNode, message, messageType) {
+  for (var i = 0; i < formNode.childNodes.length; i++) {
+    if (formNode.childNodes[i].className != undefined &&
+        formNode.childNodes[i].className.includes("form-control-feedback")) {
+      var notes = formNode.childNodes[i];
+      if (!formNode.className.includes(messageType)) {
+        formNode.className += " " + messageType;
+      }
+      notes.innerHTML += message + '<br />';
+    }        
+  }
 }
 
 var pqButton = document.getElementById('pq-button');
@@ -94,7 +122,6 @@ pqButton.onclick = function(event) {
     errorMessage(qForm, "P cannot equal Q.");
     isValidState = false;
   }
-
   if (!isValidState) {
     return;
   }
@@ -106,34 +133,42 @@ pqButton.onclick = function(event) {
   successMessage(pForm, 'P is prime.');
   successMessage(qForm, 'Q is prime.');
 
-  // Will override the success border
+  // Will override the success border, but leave the success message.
   if (n.value < 255) {
     warningMessage(parentForm, "Warning: N < 255, so some ASCII encoding will not work.");
   }
-  if ( (n.value ** 2) > Number.MAX_SAFE_INTEGER) {
+  if ( (n.value * n.value) > Number.MAX_SAFE_INTEGER) {
     warningMessage(parentForm, "Warning: N > sqrt(" + Number.MAX_SAFE_INTEGER + "), so some calculations may overflow.");
   }
 
-
   // Generate candidates for e*d % z = 1
-  generateCandidates();
-}
-
-function generateCandidates() {
+  var valid = generateCandidates(z.value);
   var modTextArea = document.getElementById('mod-candidates');
   modTextArea.value = "";
+  for (var k = 0; k < valid.length; k++) {
+    modTextArea.value = modTextArea.value + valid[k] + ", ";
+  }
+  modTextArea.value = modTextArea.value.substr(0, modTextArea.value.length-2);
+}
+
+/**
+ * Generate the valid candidates that fulfil i % z == 1.
+ * This should provide 30 values (avoid an overflow).
+ * @param {Number} z - The number z in the equation.
+ */
+function generateCandidates(z) {
   var valid = [];
-  for (var i = 2; valid.length < 30; i++) {
-    if (i % z.value == 1) {
+  for (var i = 2; valid.length < 30 && i < Number.MAX_SAFE_INTEGER; i++) {
+    if (i % z == 1) {
       valid.push(i);
     }
   }
-
-  for (var k = 0; k < valid.length; k++) {
-    modTextArea.value = modTextArea.value + valid[k] + " ";
-  }
+  return valid;
 }
 
+/**
+ * Factor K and display the results into a textarea.
+ */
 var factorButton = document.getElementById('factors-button');
 factorButton.onclick = function(event) {
   var factors = factor(k.value);
@@ -145,19 +180,26 @@ factorButton.onclick = function(event) {
   document.getElementById('factors-input').value = result;
 }
 
+/**
+ * Return an array of the factors of k, including k but not
+ * 1. Since we use factor() to check if two elements are relatively
+ * prime, including 1 will make every number not relatively prime.
+ * @param {Number} k - The number to factor.
+ */
 function factor(k) {
-  // return an array of factors of k
   var factors = [];
   for (var i = 2; i <= k; i++) {
     if (k % i == 0) {
       factors.push(i);
-      console.log('found', i, 'as a factor of', k);
     }
   }
-  
   return factors;
 }
 
+/**
+ * Check if the values put into E and D are valid. They need to each
+ * be relatively prime to Z, and still fulfil (E*D) mod Z = 1.
+ */
 var edButton = document.getElementById('ed-button');
 edButton.onclick = function(event) {
   var parentForm = document.getElementById('ed-form');
@@ -176,12 +218,12 @@ edButton.onclick = function(event) {
     errorMessage(dForm, "No value for D.");
     isValidState = false;
   }
-
   var eFactors = factor(e.value);
   var dFactors = factor(d.value);
 
   /*
-   * Check if e and d have any similar factors.
+  * Check if e and d have any similar factors by factoring them
+  * and seeing if the returned arrays have any factors in common.
   */
   var filtered = [];
   for (var i = 0; i < eFactors.length; i++) {
@@ -204,10 +246,17 @@ edButton.onclick = function(event) {
   successMessage(dForm, 'D is relatively prime to Z.')
 }
 
+/**
+ * Get the input from the plaintext textarea and convert it. The ASCII
+ * output is displayed in one box, the encrypted ASCII output is displayed
+ * in another, and the decrypted plaintext (using the encrypted ASCII) is
+ * displayed in a third box.
+ */
 var plainTextButton = document.getElementById('msg-plaintext-btn');
 plainTextButton.onclick = function(event) {
   var plainTextArea = document.getElementById('msg-plaintext');
   var asciiTextArea = document.getElementById('msg-ascii');
+  var decryptedTextArea = document.getElementById('msg-decrypted');
   var ascii = asciiEncode(plainTextArea.value);
   var result = "";
   for (var i = 0; i < ascii.length; i++) {
@@ -215,9 +264,22 @@ plainTextButton.onclick = function(event) {
   }
   asciiTextArea.value = result;
   var encoded = encryptText(ascii);
-  decryptText(encoded);
+  var decrypted = decryptText(encoded);
+  decryptedTextArea.value = decrypted;
+
+  // Check the result
+  if (plainTextArea.value != decryptedTextArea.value) {
+    errorMessage(document.getElementById('decrypted-form'), 'Decrpted message does not match original.');
+  } else {
+    successMessage(document.getElementById('decrypted-form'), 'The decrypted message matches the original.');
+  }
 }
 
+/**
+ * Compute if the given number is prime or not.
+ * @param {Number} num - The number to check.
+ * @returns {Boolean} 
+ */
 function isPrime(num) {
   if (num == '') return false;
   var stop = Math.sqrt(num);
@@ -226,6 +288,12 @@ function isPrime(num) {
   return num !== 1;
 }
 
+/**
+ * Take a string of input and turn it into an array of ASCII
+ * numbers representing each character.
+ * @param {String} text - The input string.
+ * @returns {int[]} The output array of ASCII values.
+ */
 function asciiEncode(text) {
   var chars = [];
   for (let i = 0; i < text.length; i++) {
@@ -235,9 +303,17 @@ function asciiEncode(text) {
   return chars;
 }
 
+/**
+ * Compute (base^exp) % mod. Since base and exp are all relatively large
+ * values, care must be taken to avoid an overflow.
+ * @param {Number} base - The base of the exponent.
+ * @param {Number} exp - The power of the exponent.
+ * @param {Number} mod - The modulus to take.
+ * @returns {Number} The result of the operation.
+ */
 function powerMod(base, exp, mod) {
   if ((base < 1) || (exp < 0) || (mod < 1)) {
-    return(-1);
+    return -1;
   }
   result = 1;
   while (exp > 0) {
@@ -250,6 +326,12 @@ function powerMod(base, exp, mod) {
   return result;
 }
 
+/**
+ * Take an array of ASCII values and encode them using RSA. For each value,
+ * encrypted = (value)^E mod N.
+ * @param {int[]} ascii - The ASCII value array.
+ * @returns {int[]} The encoded ASCII array.
+ */
 function encryptText(ascii) {
   var encodedTextArea = document.getElementById('msg-encoded');
   var result = "";
@@ -262,20 +344,17 @@ function encryptText(ascii) {
   return encoded;
 }
 
+/**
+ * Decrypt the passed-in ASCII numbers and return a string from the
+ * decoded ASCII.
+ * @param {int[]} arr - The array of encrypted ASCII numbers to decrypt.
+ * @returns {String} The decoded string
+ */
 function decryptText(arr) {
   clearMessages(document.getElementById('decrypted-form'));
-  var decryptedTextArea = document.getElementById('msg-decrypted');
   var result = "";
   arr.forEach((ch) => {
     result += String.fromCharCode(powerMod(ch, d.value, n.value));
   })
-  decryptedTextArea.value = result;
-
-  // Check the result
-  var plainTextArea = document.getElementById('msg-plaintext');
-  if (plainTextArea.value != decryptedTextArea.value) {
-    errorMessage(document.getElementById('decrypted-form'), 'Decrpted message does not match original.');
-  } else {
-    successMessage(document.getElementById('decrypted-form'), 'The decrypted message matches the original.');
-  }
+  return result;
 }
