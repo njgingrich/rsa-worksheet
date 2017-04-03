@@ -7,6 +7,121 @@ var q = document.getElementById('q-input');
 var z = document.getElementById('z-input');
 
 /**
+ * Generate the valid candidates that fulfil i % z == 1.
+ * This should provide 30 values (avoid an overflow).
+ * @param {Number} z - The number z in the equation.
+ */
+function generateCandidates(z) {
+  var valid = [];
+  for (var i = 2; valid.length < 30 && i < Number.MAX_SAFE_INTEGER; i++) {
+    if (i % z == 1) {
+      valid.push(i);
+    }
+  }
+  return valid;
+}
+
+/**
+ * Return an array of the factors of k, including k but not
+ * 1. Since we use factor() to check if two elements are relatively
+ * prime, including 1 will make every number not relatively prime.
+ * @param {Number} k - The number to factor.
+ */
+function factor(k) {
+  var factors = [];
+  for (var i = 2; i <= k; i++) {
+    if (k % i == 0) {
+      factors.push(i);
+    }
+  }
+  return factors;
+}
+
+/**
+ * Compute if the given number is prime or not.
+ * @param {Number} num - The number to check.
+ * @returns {Boolean} 
+ */
+function isPrime(num) {
+  if (num == '') return false;
+  var stop = Math.sqrt(num);
+  for(var i = 2; i < stop; i++)
+    if(num % i === 0) return false;
+  return num !== 1;
+}
+
+/**
+ * Take a string of input and turn it into an array of ASCII
+ * numbers representing each character.
+ * @param {String} text - The input string.
+ * @returns {int[]} The output array of ASCII values.
+ */
+function asciiEncode(text) {
+  var chars = [];
+  for (let i = 0; i < text.length; i++) {
+    var ch = "" + text.charCodeAt(i);
+    chars.push(ch);
+  }
+  return chars;
+}
+
+/**
+ * Compute (base^exp) % mod. Since base and exp are all relatively large
+ * values, care must be taken to avoid an overflow.
+ * @param {Number} base - The base of the exponent.
+ * @param {Number} exp - The power of the exponent.
+ * @param {Number} mod - The modulus to take.
+ * @returns {Number} The result of the operation.
+ */
+function powerMod(base, exp, mod) {
+  if ((base < 1) || (exp < 0) || (mod < 1)) {
+    return -1;
+  }
+  result = 1;
+  while (exp > 0) {
+    if ((exp % 2) == 1) {
+      result = (result * base) % mod;
+    }
+    base = (base * base) % mod;
+    exp = Math.floor(exp / 2);
+  }
+  return result;
+}
+
+/**
+ * Take an array of ASCII values and encode them using RSA. For each value,
+ * encrypted = (value)^E mod N.
+ * @param {int[]} ascii - The ASCII value array.
+ * @returns {int[]} The encoded ASCII array.
+ */
+function encryptText(ascii) {
+  var encodedTextArea = document.getElementById('msg-encoded');
+  var result = "";
+  var encoded = [];
+  ascii.forEach((ch) => {
+    encoded.push(powerMod(ch, e.value, n.value));
+    result += powerMod(ch, e.value, n.value) + " ";
+  })
+  encodedTextArea.value = result;
+  return encoded;
+}
+
+/**
+ * Decrypt the passed-in ASCII numbers and return a string from the
+ * decoded ASCII.
+ * @param {int[]} arr - The array of encrypted ASCII numbers to decrypt.
+ * @returns {String} The decoded string
+ */
+function decryptText(arr) {
+  clearMessages(document.getElementById('decrypted-form'));
+  var result = "";
+  arr.forEach((ch) => {
+    result += String.fromCharCode(powerMod(ch, d.value, n.value));
+  })
+  return result;
+}
+
+/**
  * When the various inputs change, the validation states should
  * be cleared until rechecked with their corresponding button.
  */
@@ -92,6 +207,12 @@ function sendMessage(formNode, message, messageType) {
   }
 }
 
+/**
+ * Check the input values for P and Q and see if they are valid.
+ * P and Q both need to be prime, cannot equal each other, and the
+ * result should be both larger than 255 to display all ASCII properly
+ * and smaller than MAX_SAFE_INTEGER to avoid overflow.
+ */
 var pqButton = document.getElementById('pq-button');
 pqButton.onclick = function(event) {
   var parentForm = document.getElementById('pq-form');
@@ -152,21 +273,6 @@ pqButton.onclick = function(event) {
 }
 
 /**
- * Generate the valid candidates that fulfil i % z == 1.
- * This should provide 30 values (avoid an overflow).
- * @param {Number} z - The number z in the equation.
- */
-function generateCandidates(z) {
-  var valid = [];
-  for (var i = 2; valid.length < 30 && i < Number.MAX_SAFE_INTEGER; i++) {
-    if (i % z == 1) {
-      valid.push(i);
-    }
-  }
-  return valid;
-}
-
-/**
  * Factor K and display the results into a textarea.
  */
 var factorButton = document.getElementById('factors-button');
@@ -178,22 +284,6 @@ factorButton.onclick = function(event) {
   }
   result = result.substr(0, result.length - 2)
   document.getElementById('factors-input').value = result;
-}
-
-/**
- * Return an array of the factors of k, including k but not
- * 1. Since we use factor() to check if two elements are relatively
- * prime, including 1 will make every number not relatively prime.
- * @param {Number} k - The number to factor.
- */
-function factor(k) {
-  var factors = [];
-  for (var i = 2; i <= k; i++) {
-    if (k % i == 0) {
-      factors.push(i);
-    }
-  }
-  return factors;
 }
 
 /**
@@ -273,88 +363,4 @@ plainTextButton.onclick = function(event) {
   } else {
     successMessage(document.getElementById('decrypted-form'), 'The decrypted message matches the original.');
   }
-}
-
-/**
- * Compute if the given number is prime or not.
- * @param {Number} num - The number to check.
- * @returns {Boolean} 
- */
-function isPrime(num) {
-  if (num == '') return false;
-  var stop = Math.sqrt(num);
-  for(var i = 2; i < stop; i++)
-    if(num % i === 0) return false;
-  return num !== 1;
-}
-
-/**
- * Take a string of input and turn it into an array of ASCII
- * numbers representing each character.
- * @param {String} text - The input string.
- * @returns {int[]} The output array of ASCII values.
- */
-function asciiEncode(text) {
-  var chars = [];
-  for (let i = 0; i < text.length; i++) {
-    var ch = "" + text.charCodeAt(i);
-    chars.push(ch);
-  }
-  return chars;
-}
-
-/**
- * Compute (base^exp) % mod. Since base and exp are all relatively large
- * values, care must be taken to avoid an overflow.
- * @param {Number} base - The base of the exponent.
- * @param {Number} exp - The power of the exponent.
- * @param {Number} mod - The modulus to take.
- * @returns {Number} The result of the operation.
- */
-function powerMod(base, exp, mod) {
-  if ((base < 1) || (exp < 0) || (mod < 1)) {
-    return -1;
-  }
-  result = 1;
-  while (exp > 0) {
-    if ((exp % 2) == 1) {
-      result = (result * base) % mod;
-    }
-    base = (base * base) % mod;
-    exp = Math.floor(exp / 2);
-  }
-  return result;
-}
-
-/**
- * Take an array of ASCII values and encode them using RSA. For each value,
- * encrypted = (value)^E mod N.
- * @param {int[]} ascii - The ASCII value array.
- * @returns {int[]} The encoded ASCII array.
- */
-function encryptText(ascii) {
-  var encodedTextArea = document.getElementById('msg-encoded');
-  var result = "";
-  var encoded = [];
-  ascii.forEach((ch) => {
-    encoded.push(powerMod(ch, e.value, n.value));
-    result += powerMod(ch, e.value, n.value) + " ";
-  })
-  encodedTextArea.value = result;
-  return encoded;
-}
-
-/**
- * Decrypt the passed-in ASCII numbers and return a string from the
- * decoded ASCII.
- * @param {int[]} arr - The array of encrypted ASCII numbers to decrypt.
- * @returns {String} The decoded string
- */
-function decryptText(arr) {
-  clearMessages(document.getElementById('decrypted-form'));
-  var result = "";
-  arr.forEach((ch) => {
-    result += String.fromCharCode(powerMod(ch, d.value, n.value));
-  })
-  return result;
 }
