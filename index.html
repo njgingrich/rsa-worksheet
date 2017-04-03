@@ -1,44 +1,142 @@
 <!doctype HTML>
 <html>
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+  </head>
   <title>RSA Worksheet</title>
   <body>
-    <p>Pick 2 primes, P and Q.</p>
-    <label title="P">P: </label><input type="text" id="p-input"/>
-    <label title="Q">Q: </label><input type="text" id="q-input"/> <button id="pq-button">Check P and Q</button>
+    <div class="container">
+      <h1 class="text-center display-2 mb-5">RSA Calculator</h1>
+      <form class="form">
+        <fieldset>
+          <legend class="display-4">Generate The Clock</legend>
+          <hr>
+          <p>To generate the clock (or modulus), we need to pick two prime numbers, P and Q.</p>
 
-    <p>The values of P and Q generate N and Z.</p>
-    <p>Find the number N = P*Q (clock size)</p>
-    <label title="N">N: </label><input type="text" id="n-input"/> <button id="n-button">Calculate N</button>
-    <p>Find the number Z = (P-1)*(Q-1)</p>
-    <label title="Z">Z: </label><input type="text" id="z-input"/> <button id="z-button">Calculate Z</button>
+          <div class="row" id="pq-form">
+            <div class="col-sm-6 form-group" id="p-form">
+              <label for="p-input" class="control-label">P:</label>
+              <input type="text" class="form-control" id="p-input">
+              <div class="form-control-feedback"></div>
+            </div>
+            <div class="col-sm-6 form-group" id="q-form">
+              <label for="q-input" class="control-label">Q:</label>
+              <input type="text" class="form-control" id="q-input">
+              <div class="form-control-feedback"></div>
+            </div>
+            <div class="col-sm-12 form-group form-control-feedback"></div>
+          </div>
+          <button type="button" class="btn btn-default" id="pq-button">Set P and Q</button>
 
-    <p>Then you need to find two numbers E and D such that E*D mod Z = 1.</p>
-    <label title="candidates">Candidates for 1 mod Z: </label>
-    <textarea id="mod-candidates" cols=40 rows=5></textarea>
-    <button id="cand-button">Generate Candidates</button>
+          <div class="row">
+            <div class="col-sm-12 form-group">
+              <p>
+                These values of P and Q generate N and Z. N is the clock, while Z is a number that your eventual public and
+                private keys need to be relatively prime to in order to get good encryption. 
+              </p>
+            </div>
+            <div class="col-sm-6 form-group">
+              <label for="n-input" class="control-label">N = P*Q (clock size)</label>
+              <input type="text" class="form-control" id="n-input"/>
+            </div>
+            <div class="col-sm-6 form-group">
+              <label for="z-input" class="control-label">Z = (P-1)*(Q-1)</label>
+              <input type="text" class="form-control" id="z-input"/>
+            </div>
+          </div>
 
-    <p>Enter a candidate value of K into the box.</p>
-    <label title="K">K: </label><input type="text" id="k-input"/>
+          <div class="row">
+            <div class="col-sm-12 form-group">
+              <p>Then you need to find two numbers E and D such that E*D mod Z = 1.</p>
+              <label for="mod-candidates" class="control-label">Candidates for 1 mod Z: </label><br />
+              <textarea id="mod-candidates" class="form-control" cols=40 rows=5></textarea>
+            </div>
+          </div>
+        </fieldset>
 
-    <p>Factors of K:</p>
-    <input type="text" id="factors-input"/> <button id="factors-button">Generate Factors</button>
-    <br />
+        <fieldset>
+          <legend class="display-4">Find Candidates for E and D</legend>
+          <hr>
+          <div class="row">
+            <div class="col-sm-12 form-group">
+              <p>
+                Using the candidate values for 1 mod Z from above, we can determine which ones are factorable.
+                We want two factors of K (the candidate value), which can be used for E and D so that e*d % z = 1,
+                and so E and D are both relatively prime to Z.
+              </p>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="k-input" class="control-label">Enter a candidate value of K</label>
+            <input type="text" class="form-control" id="k-input"/>
+          </div>
+          <div class="form-group">
+            <button class="btn btn-default" type="button" id="factors-button">Generate Factors</button>
+          </div>
+          <div class="form-group">
+            <label for="factors-input" class="control-label">Factors of K</label>
+            <input type="text" class="form-control" id="factors-input">
+          </div>
+        </fieldset>
 
-    <p>Use factors of candidate K values for E and D. E and D should be relatively prime.</p>
-    <label title="E">E: </label><input type="text" id="e-input"/>
-    <label title="D">D: </label><input type="text" id="d-input"/> <button id="ed-button">Check E and D</button>
+        <fieldset>
+          <legend class="display-4">Check E and D</legend>
+          <hr>
+          <div class="row">
+            <div class="col-sm-12 form-group">
+              <p>
+                Use the factors from above to find two possible values for E and D. Enter them into the
+                boxes and check if they are valid.
+              </p>
+            </div>
+          </div>
+          <div class="row" id="ed-form">
+            <div class="col-sm-6 form-group" id="e-form">
+              <label for="e-input" class="control-label">Value for E</label>
+              <input type="text" class="form-control" id="e-input">
+              <div class="form-control-feedback"></div>
+            </div>
+            <div class="col-sm-6 form-group" id="d-form">
+              <label for="d-input" class="control-label">Value for D</label>
+              <input type="text" class="form-control" id="d-input">
+              <div class="form-control-feedback"></div>
+            </div>
+            <div class="col-sm-12 form-group form-control-feedback"></div>
+            <div class="col-sm-12 form-group">
+              <button class="btn btn-default" type="button" id="ed-button">Check E and D</button>
+            </div>
+          </div>
+        </fieldset>
 
-    <p>Enter a message in plaintext here:</p>
-    <textarea id="msg-plaintext" rows=5 cols=80></textarea>
-    <br />
-    <button id="msg-plaintext-btn">Encode</button>
-    <p>ASCII encoded message:</p>
-    <textarea id="msg-ascii" rows=5 cols=80></textarea>
-    <p>Encrypted Message:</p>
-    <textarea id="msg-encoded" rows=5 cols=80></textarea>
-    <p>Decoded Message:</p>
-    <textarea id="msg-decrypted" rows=5 cols=80></textarea>
+        <fieldset>
+          <legend class="display-4">Encoding and Decoding Messages</legend>
+          <hr>
 
-    <script src="script.js"></script>
+          <div class="form-group">
+            <label for="msg-plaintext">Enter a message in plaintext here:</label>
+            <textarea class="form-control" id="msg-plaintext" rows=5 cols=80></textarea>
+          </div>
+          <div class="form-group">
+            <button class="btn btn-default" type="button" id="msg-plaintext-btn">Encode</button>
+          </div>         
+          <div class="form-group">
+            <label for="msg-ascii">ASCII encoded message:</label>
+            <textarea class="form-control" id="msg-ascii" rows=5 cols=80></textarea>
+          </div>
+          <div class="form-group">
+            <label for="msg-encoded">Encrypted Message:</label>
+            <textarea class="form-control" id="msg-encoded" rows=5 cols=80></textarea>
+          </div>
+          <div class="form-group">
+            <label for="msg-decrypted">Decoded Message:</label>
+            <textarea class="form-control" id="msg-decrypted" rows=5 cols=80></textarea>
+          </div>
+        </fieldset>
+      </form>
+
+      <script src="script.js"></script>
+    </div>
   </body>
 </html>

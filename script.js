@@ -1,3 +1,7 @@
+/**
+ * https://www.cs.drexel.edu/~introcs/Fa12/notes/10.1_Cryptography/RSAWorksheetv4d.html
+ */
+
 var d = document.getElementById('d-input');
 var e = document.getElementById('e-input');
 var k = document.getElementById('k-input');
@@ -6,30 +10,109 @@ var p = document.getElementById('p-input');
 var q = document.getElementById('q-input');
 var z = document.getElementById('z-input');
 
-var pqButton = document.getElementById('pq-button');
-pqButton.onclick = function(event) {
-  if (p.value == "" || q.value == "") {
-    alert('No value for P or Q');
-  } else {
-    if (!isPrime(p.value) || !isPrime(q.value)) {
-      alert('P or Q is not prime');
-    }
+function clearMessages(node) {
+  for (var i = 0; i < node.childNodes.length; i++) {
+    if (node.childNodes[i].className != undefined &&
+        node.childNodes[i].className.includes('form-control-feedback')) {
+      var notes = node.childNodes[i];
+      node.className = node.className.replace('has-danger', '');
+      node.className = node.className.replace('has-warning', '');
+      notes.innerHTML = '';
+    }        
   }
 }
 
-var zButton = document.getElementById('z-button');
-zButton.onclick = function(event) {
-  z.value = (p.value - 1) * (q.value - 1);
+function errorMessage(formNode, message) {
+  sendMessage(formNode, message, "has-danger");
 }
 
-var nButton = document.getElementById('n-button');
-nButton.onclick = function(event) {
+function warningMessage(formNode, message) {
+  sendMessage(formNode, message, "has-warning")
+}
+
+function sendMessage(formNode, message, warningType) {
+  for (var i = 0; i < formNode.childNodes.length; i++) {
+    if (formNode.childNodes[i].className != undefined &&
+        formNode.childNodes[i].className.includes("form-control-feedback")) {
+      var notes = formNode.childNodes[i];
+      if (!formNode.className.includes(warningType)) {
+        formNode.className += " " + warningType;
+      }
+      notes.innerHTML += message + '<br />';
+    }        
+  }
+}
+
+d.oninput = function() {
+  clearMessages(document.getElementById('d-form'));
+  clearMessages(document.getElementById('ed-form'));
+}
+e.oninput = function() {
+  clearMessages(document.getElementById('e-form'));
+  clearMessages(document.getElementById('ed-form'));
+}
+p.oninput = function() {
+  clearMessages(document.getElementById('p-form'));
+  clearMessages(document.getElementById('pq-form'));
+}
+q.oninput = function() {
+  clearMessages(document.getElementById('q-form'));
+  clearMessages(document.getElementById('pq-form'));
+}
+
+var pqButton = document.getElementById('pq-button');
+pqButton.onclick = function(event) {
+  var parentForm = document.getElementById('pq-form');
+  var pForm = document.getElementById('p-form');
+  var qForm = document.getElementById('q-form');
+  var isValidState = true;
+  clearMessages(parentForm);
+  clearMessages(pForm);
+  clearMessages(qForm);
+
+  if (p.value == "") {
+    errorMessage(pForm, "No value for P.");
+    isValidState = false;
+  }
+  if (q.value == "") {
+    errorMessage(qForm, "No value for Q.");
+    isValidState = false;
+  }
+  if (!isPrime(p.value)) {
+    errorMessage(pForm, "P must be prime.");
+    isValidState = false;
+  }
+  if (!isPrime(q.value)) {
+    errorMessage(qForm, "Q must be prime.");
+    isValidState = false;
+  }
+  if (p.value == q.value) {
+    errorMessage(qForm, "P cannot equal Q.");
+    isValidState = false;
+  }
+
+  if (!isValidState) {
+    return;
+  }
+  // Generate N
   n.value = p.value * q.value;
+  if (n.value < 255) {
+    warningMessage(parentForm, "Warning: N < 255, so some ASCII encoding will not work.");
+  }
+  if ( (n.value ** 2) > Number.MAX_SAFE_INTEGER) {
+    warningMessage(parentForm, "Warning: N > sqrt(" + Number.MAX_SAFE_INTEGER + "), so some calculations may overflow.");
+  }
+
+  // Generate Z
+  z.value = (p.value - 1) * (q.value - 1);
+
+  // Generate candidates for e*d % z = 1
+  generateCandidates();
 }
 
-var candButton = document.getElementById('cand-button');
-var modTextArea = document.getElementById('mod-candidates');
-candButton.onclick = function(event) {
+function generateCandidates() {
+  var modTextArea = document.getElementById('mod-candidates');
+  modTextArea.value = "";
   var valid = [];
   for (var i = 2; valid.length < 30; i++) {
     if (i % z.value == 1) {
@@ -49,8 +132,7 @@ factorButton.onclick = function(event) {
   for (var i = 0; i < factors.length; i++) {
     result += factors[i] + ", ";
   }
-  result = result.substr(0, result.length - 3)
-
+  result = result.substr(0, result.length - 2)
   document.getElementById('factors-input').value = result;
 }
 
@@ -69,24 +151,41 @@ function factor(k) {
 
 var edButton = document.getElementById('ed-button');
 edButton.onclick = function(event) {
+  var parentForm = document.getElementById('ed-form');
+  var eForm = document.getElementById('e-form');
+  var dForm = document.getElementById('d-form');
+  var isValidState = true;
+  clearMessages(parentForm);
+  clearMessages(eForm);
+  clearMessages(dForm);
+
+  if (e.value == "") {
+    errorMessage(eForm, "No value for E.");
+    isValidState = false;
+  }
+  if (d.value == "") {
+    errorMessage(dForm, "No value for D.");
+    isValidState = false;
+  }
+
   var eFactors = factor(e.value);
   var dFactors = factor(d.value);
 
+  /*
+   * Check if e and d have any similar factors.
+  */
   var filtered = [];
   for (var i = 0; i < eFactors.length; i++) {
     if (dFactors.indexOf(eFactors[i]) >= 0) {
       filtered.push(eFactors[i]);
     }
   }
-
   if (filtered.length > 0) {
-    alert('E and D are not relatively prime.');
-  } else if ( (e.value * d.value) % z.value != 1) {
-    alert('(E*D) mod Z != 1');
-  } else {
-    alert('E and D are relatively prime and (E * D) mod Z = 1.')
+    errorMessage(parentForm, 'E and D are not relatively prime.');
   }
-
+  if ( (e.value * d.value) % z.value != 1) {
+    errorMessage(parentForm, '(E*D) mod Z != 1');
+  }
 }
 
 var plainTextButton = document.getElementById('msg-plaintext-btn');
@@ -103,8 +202,12 @@ plainTextButton.onclick = function(event) {
   decryptText(encoded);
 }
 
-function isPrime(i) {
-  return true
+function isPrime(num) {
+  if (num == '') return false;
+  var stop = Math.sqrt(num);
+  for(var i = 2; i < stop; i++)
+    if(num % i === 0) return false;
+  return num !== 1;
 }
 
 function asciiEncode(text) {
