@@ -7,7 +7,7 @@ var q = document.getElementById('q-input');
 var z = document.getElementById('z-input');
 
 //============================================================
-// To be completed.
+// RSA Functions.
 //============================================================
 
 /**
