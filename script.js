@@ -6,19 +6,102 @@ var p = document.getElementById('p-input');
 var q = document.getElementById('q-input');
 var z = document.getElementById('z-input');
 
-/* temp */
-var debugText = document.getElementById('debug-data');
-debugText.onclick = function() {
-  p.value = 1423;
-  q.value = 1361;
-  n.value = 1936703;
-  z.value = 1933920;
-  e.value = 7;
-  d.value = 828823;
-  document.getElementById('msg-plaintext').value = "hello hello hello";
-  console.log('Debug data entered!');
+//============================================================
+// To be completed.
+//============================================================
+
+/**
+ * Compute (base^exp) % mod. Since base and exp are all relatively large
+ * values, care must be taken to avoid an overflow.
+ * @param {Number} base - The base of the exponent.
+ * @param {Number} exp - The power of the exponent.
+ * @param {Number} mod - The modulus to take.
+ * @returns {Number} The result of the operation.
+ */
+function powerMod(base, exp, mod) {
+  if ((base < 1) || (exp < 0) || (mod < 1)) {
+    return -1;
+  }
+  result = 1;
+  while (exp > 0) {
+    if ((exp % 2) == 1) {
+      result = (result * base) % mod;
+    }
+    base = (base * base) % mod;
+    exp = Math.floor(exp / 2);
+  }
+  return result;
 }
 
+/**
+ * Take an array of ASCII values and encode them using RSA. Split the ASCII
+ * string into lengths of size n, then encrypt that string.
+ * @param {string[]} ascii - The ASCII value array.
+ * @returns {string[]} The encoded ASCII array.
+ */
+function encryptText(ascii) {
+  // merge the ascii into one string and split it into strings of length(n) - 1
+  var encodedStr = ascii.join('');
+  var encoded = [];
+  for (var i = 0; i < encodedStr.length; i += n.value.length-1) {
+    encoded.push(encodedStr.substring(i, i + n.value.length-1));
+  }
+
+  // for each chunk, encrypt it using the formula encrypted = (chunk)^E mod N.
+  // This should be implemented using the powerMod() function.
+  encoded = encoded.map((s) => {
+    return powerMod(s, e.value, n.value);
+  })
+
+  return encoded;
+}
+
+/**
+ * Decrypt the passed-in ASCII numbers and return a string from the
+ * decoded ASCII.
+ * @param {int[]} arr - The array of encrypted ASCII numbers to decrypt.
+ * @returns {String} The decoded string
+ */
+function decryptText(arr) {
+  clearMessages(document.getElementById('decrypted-form'));
+  var decoded = [];
+
+  // Decode each element of the encrypted array.
+  // The last element may be less than length(n) - 1, so it's powerMod() should
+  // be calculated separately.
+  var lastEncoded = arr[arr.length-1];
+  arr.forEach(el => {
+    decoded.push(pad(powerMod(el, d.value, n.value), n.value.length-1));
+  })
+  // the last element can be less than n.length, so it shouldn't be padded
+  decoded[decoded.length-1] = powerMod(lastEncoded, d.value, n.value);
+
+  // Turn the decoded chunks into one string and split it into size 3, and
+  // convert it back into ASCII.
+  decodedStr = decoded.join('');
+  var ascii = [];
+  for (var i = 0; i < decodedStr.length; i += 3) {
+    var sub = decodedStr.substring(i, i + 3);
+    var char = String.fromCharCode(sub);
+    ascii.push(char);
+  }
+
+  return ascii.join('');
+}
+
+//============================================================
+// Helper functions, utilities, and validation scripts.
+//============================================================
+
+/**
+ * Left-pad a string with '0's to make it a certain length.
+ * @param {String} value - The value to pad.
+ * @param {Number} length - The desired length of the string.
+ * @returns {String} The padded string.
+ */
+function pad(value, length) {
+    return (value.toString().length < length) ? pad("0"+value, length) : value;
+}
 
 /**
  * Generate the valid candidates that fulfil i % z == 1.
@@ -81,91 +164,6 @@ function asciiEncode(text) {
 }
 
 /**
- * Compute (base^exp) % mod. Since base and exp are all relatively large
- * values, care must be taken to avoid an overflow.
- * @param {Number} base - The base of the exponent.
- * @param {Number} exp - The power of the exponent.
- * @param {Number} mod - The modulus to take.
- * @returns {Number} The result of the operation.
- */
-function powerMod(base, exp, mod) {
-  if ((base < 1) || (exp < 0) || (mod < 1)) {
-    return -1;
-  }
-  result = 1;
-  while (exp > 0) {
-    if ((exp % 2) == 1) {
-      result = (result * base) % mod;
-    }
-    base = (base * base) % mod;
-    exp = Math.floor(exp / 2);
-  }
-  return result;
-}
-
-/**
- * Left-pad a string with '0's to make it a certain length.
- * @param {String} value - The value to pad.
- * @param {Number} length - The desired length of the string.
- * @returns {String} The padded string.
- */
-function pad(value, length) {
-    return (value.toString().length < length) ? pad("0"+value, length) : value;
-}
-
-/**
- * Take an array of ASCII values and encode them using RSA. Split the ASCII
- * string into lengths of size n, then encrypt that string.
- * @param {string[]} ascii - The ASCII value array.
- * @returns {string[]} The encoded ASCII array.
- */
-function encryptText(ascii) {
-  var encodedTextArea = document.getElementById('msg-encoded');
-  // merge the ascii into one string and split it into strings of length n.length
-  var encodedStr = ascii.join('');
-  var encoded = [];
-  for (var i = 0; i < encodedStr.length; i += n.value.length-1) {
-    encoded.push(encodedStr.substring(i, i + n.value.length-1));
-  }
-  encoded = encoded.map((s) => {
-    return '' + pad(powerMod(s, e.value, n.value), n.value.length-1);
-  })
-  encodedTextArea.value = encoded.join('');
-  return encoded;
-}
-
-/**
- * Decrypt the passed-in ASCII numbers and return a string from the
- * decoded ASCII.
- * @param {int[]} arr - The array of encrypted ASCII numbers to decrypt.
- * @returns {String} The decoded string
- */
-function decryptText(arr) {
-  clearMessages(document.getElementById('decrypted-form'));
-  var decoded = [];
-
-  // decode each element of the encrypted array
-  var lastEncoded = arr[arr.length-1];
-  arr.forEach(el => {
-    decoded.push(pad(powerMod(el, d.value, n.value), n.value.length-1));
-  })
-
-  // the last element can be less than n.length, so it shouldn't be padded
-  decoded[decoded.length-1] = powerMod(lastEncoded, d.value, n.value);
-
-  // turn the decoded chunks into one string and split it into size 3
-  decodedStr = decoded.join('');
-  var ascii = [];
-  for (var i = 0; i < decodedStr.length; i += 3) {
-    var sub = decodedStr.substring(i, i + 3);
-    var char = String.fromCharCode(sub);
-    ascii.push(char);
-  }
-
-  return ascii.join('');
-}
-
-/**
  * Generate a random prime between min and max, inclusive.
  * @param {Number} min - The minimum value allowed.
  * @param {Number} max - The maximum value allowed.
@@ -185,6 +183,19 @@ function generateRandomPrime(min, max) {
       rand++;
     }
   }
+}
+
+/* Temp data for testing. */
+var debugText = document.getElementById('debug-data');
+debugText.onclick = function() {
+  p.value = 1423;
+  q.value = 1361;
+  n.value = 1936703;
+  z.value = 1933920;
+  e.value = 7;
+  d.value = 828823;
+  document.getElementById('msg-plaintext').value = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc quis nisi massa. Proin ut nisl nec orci rhoncus dapibus. Nam commodo justo eu aliquam consequat. Etiam ultrices nisl dolor, id sagittis leo lobortis vel. Nullam porta libero sit amet tellus porta congue. Quisque tempor dolor lectus, accumsan feugiat sapien eleifend eu. Phasellus sed fermentum lorem, sed sodales mi.";
+  console.log('Debug data entered!');
 }
 
 /**
@@ -422,6 +433,7 @@ var plainTextButton = document.getElementById('msg-plaintext-btn');
 plainTextButton.onclick = function(event) {
   var plainTextArea = document.getElementById('msg-plaintext');
   var asciiTextArea = document.getElementById('msg-ascii');
+  var encodedTextArea = document.getElementById('msg-encoded');
   var decryptedTextArea = document.getElementById('msg-decrypted');
   var ascii = asciiEncode(plainTextArea.value);
   var result = "";
@@ -429,9 +441,13 @@ plainTextButton.onclick = function(event) {
     result += ascii[i] + " ";
   }
   asciiTextArea.value = result;
+  setHeight(asciiTextArea);
   var encoded = encryptText(ascii);
+  encodedTextArea.value = encoded.join('');
+  setHeight(encodedTextArea);
   var decrypted = decryptText(encoded);
   decryptedTextArea.value = decrypted;
+  setHeight(decryptedTextArea);
 
   // Check the result
   if (plainTextArea.value != decryptedTextArea.value) {
@@ -439,4 +455,12 @@ plainTextButton.onclick = function(event) {
   } else {
     successMessage(document.getElementById('decrypted-form'), 'The decrypted message matches the original.');
   }
+}
+
+/**
+ * Set the height of a text area so that the content has no scrollbar.
+ * @param {HTMLElement} node - The textarea to change.
+ */
+function setHeight(node) {
+  node.style.height = (node.scrollHeight+10)+'px';
 }
