@@ -7,13 +7,18 @@ var q = document.getElementById('q-input');
 var z = document.getElementById('z-input');
 
 /* temp */
-p.value = 1423;
-q.value = 1361;
-n.value = 1936703;
-z.value = 1933920;
-e.value = 7;
-d.value = 828823;
-document.getElementById('msg-plaintext').value = "hello hello hello";
+var debugText = document.getElementById('debug-data');
+debugText.onclick = function() {
+  p.value = 1423;
+  q.value = 1361;
+  n.value = 1936703;
+  z.value = 1933920;
+  e.value = 7;
+  d.value = 828823;
+  document.getElementById('msg-plaintext').value = "hello hello hello";
+  console.log('Debug data entered!');
+}
+
 
 /**
  * Generate the valid candidates that fulfil i % z == 1.
@@ -98,6 +103,12 @@ function powerMod(base, exp, mod) {
   return result;
 }
 
+/**
+ * Left-pad a string with '0's to make it a certain length.
+ * @param {String} value - The value to pad.
+ * @param {Number} length - The desired length of the string.
+ * @returns {String} The padded string.
+ */
 function pad(value, length) {
     return (value.toString().length < length) ? pad("0"+value, length) : value;
 }
@@ -116,10 +127,7 @@ function encryptText(ascii) {
   for (var i = 0; i < encodedStr.length; i += n.value.length-1) {
     encoded.push(encodedStr.substring(i, i + n.value.length-1));
   }
-  console.log('merged ascii', encoded);
   encoded = encoded.map((s) => {
-    console.log(powerMod(s, e.value, n.value), n.value.length-1);
-    console.log('n.length = ', n.value.length-1);
     return '' + pad(powerMod(s, e.value, n.value), n.value.length-1);
   })
   encodedTextArea.value = encoded.join('');
@@ -134,19 +142,16 @@ function encryptText(ascii) {
  */
 function decryptText(arr) {
   clearMessages(document.getElementById('decrypted-form'));
-  console.log('encoded:', arr);
   var decoded = [];
 
   // decode each element of the encrypted array
   var lastEncoded = arr[arr.length-1];
   arr.forEach(el => {
-    console.log(pad(powerMod(el, d.value, n.value), n.value.length-1))
     decoded.push(pad(powerMod(el, d.value, n.value), n.value.length-1));
   })
-  
+
   // the last element can be less than n.length, so it shouldn't be padded
   decoded[decoded.length-1] = powerMod(lastEncoded, d.value, n.value);
-  console.log('decoded:', decoded);
 
   // turn the decoded chunks into one string and split it into size 3
   decodedStr = decoded.join('');
@@ -154,14 +159,18 @@ function decryptText(arr) {
   for (var i = 0; i < decodedStr.length; i += 3) {
     var sub = decodedStr.substring(i, i + 3);
     var char = String.fromCharCode(sub);
-    console.log('sub:', sub, 'char:', char);
     ascii.push(char);
   }
 
-  console.log('mapped ascii:', ascii);
   return ascii.join('');
 }
 
+/**
+ * Generate a random prime between min and max, inclusive.
+ * @param {Number} min - The minimum value allowed.
+ * @param {Number} max - The maximum value allowed.
+ * @returns {Number}
+ */
 function generateRandomPrime(min, max) {
   min = Math.ceil(min);
   max = Math.floor(max);
