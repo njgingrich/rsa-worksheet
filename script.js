@@ -63,7 +63,6 @@ function encryptText(ascii) {
  * @returns {String} The decoded string
  */
 function decryptText(arr) {
-  clearMessages(document.getElementById('decrypted-form'));
   var decoded = [];
 
   // Decode each element of the encrypted array.
@@ -450,6 +449,7 @@ plainTextButton.onclick = function(event) {
   setHeight(decryptedTextArea);
 
   // Check the result
+  clearMessages(document.getElementById('decrypted-form'));
   if (plainTextArea.value != decryptedTextArea.value) {
     errorMessage(document.getElementById('decrypted-form'), 'Decrpted message does not match original.');
   } else {
@@ -462,5 +462,6 @@ plainTextButton.onclick = function(event) {
  * @param {HTMLElement} node - The textarea to change.
  */
 function setHeight(node) {
+  node.style.height = '20px';
   node.style.height = (node.scrollHeight+10)+'px';
 }
