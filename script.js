@@ -364,9 +364,6 @@ pqButton.onclick = function(event) {
     }
     modTextArea.value = modTextArea.value.substr(0, modTextArea.value.length-2);
 
-    if (pqButton.className.includes('active')) {
-      console.log('pqbutton has active');
-    }
     pqButton.classList.remove('active');
     document.getElementById('pq-spinner').style.display = 'none';
   }, 15);
