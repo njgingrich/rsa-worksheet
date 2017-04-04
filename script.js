@@ -475,7 +475,7 @@ plainTextButton.onclick = function(event) {
     } else {
       successMessage(document.getElementById('decrypted-form'), 'The decrypted message matches the original.');
     }
-    document.getElementById('encode-spinner').style.display = 'inline';
+    document.getElementById('encode-spinner').style.display = 'none';
   }, 15);
 }
 
