@@ -6,6 +6,16 @@ var p = document.getElementById('p-input');
 var q = document.getElementById('q-input');
 var z = document.getElementById('z-input');
 
+
+/* temp */
+p.value = 1423;
+q.value = 1361;
+n.value = 1936703;
+z.value = 1933920;
+e.value = 7;
+d.value = 828823;
+document.getElementById('msg-plaintext').value = "hello hello hello";
+
 /**
  * Generate the valid candidates that fulfil i % z == 1.
  * This should provide 30 values (avoid an overflow).
@@ -54,12 +64,13 @@ function isPrime(num) {
  * Take a string of input and turn it into an array of ASCII
  * numbers representing each character.
  * @param {String} text - The input string.
- * @returns {int[]} The output array of ASCII values.
+ * @returns {string[]} The output array of ASCII values.
  */
 function asciiEncode(text) {
   var chars = [];
   for (let i = 0; i < text.length; i++) {
-    var ch = "" + text.charCodeAt(i);
+    var ch = '' + text.charCodeAt(i);
+    ch = ('000'+ch).substring(ch.length);
     chars.push(ch);
   }
   return chars;
@@ -88,21 +99,29 @@ function powerMod(base, exp, mod) {
   return result;
 }
 
+function pad(value, length) {
+    return (value.toString().length < length) ? pad("0"+value, length) : value;
+}
+
 /**
- * Take an array of ASCII values and encode them using RSA. For each value,
- * encrypted = (value)^E mod N.
- * @param {int[]} ascii - The ASCII value array.
- * @returns {int[]} The encoded ASCII array.
+ * Take an array of ASCII values and encode them using RSA. Split the ASCII
+ * string into lengths of size n, then encrypt that string.
+ * @param {string[]} ascii - The ASCII value array.
+ * @returns {string[]} The encoded ASCII array.
  */
 function encryptText(ascii) {
   var encodedTextArea = document.getElementById('msg-encoded');
-  var result = "";
+  // merge the ascii into one string and split it into strings of length n.length
+  var encodedStr = ascii.join('');
   var encoded = [];
-  ascii.forEach((ch) => {
-    encoded.push(powerMod(ch, e.value, n.value));
-    result += powerMod(ch, e.value, n.value) + " ";
+  for (var i = 0; i < encodedStr.length; i += n.value.length) {
+    encoded.push(encodedStr.substring(i, i + n.value.length));
+  }
+  console.log('merged ascii', encoded);
+  encoded = encoded.map((s) => {
+    return '' + pad(powerMod(s, e.value, n.value), n.value.length);
   })
-  encodedTextArea.value = result;
+  encodedTextArea.value = encoded.join('');
   return encoded;
 }
 
@@ -114,11 +133,36 @@ function encryptText(ascii) {
  */
 function decryptText(arr) {
   clearMessages(document.getElementById('decrypted-form'));
-  var result = "";
-  arr.forEach((ch) => {
-    result += String.fromCharCode(powerMod(ch, d.value, n.value));
+  console.log('encoded:', arr);
+  var decoded = [];
+
+  // turn the encoded string into chunks of size n
+  var encodedStr = arr.join('');
+  for (var i = 0; i < encodedStr.length; i += n.value.length) {
+    decoded.push(encodedStr.substring(i, i + n.value.length));
+  }
+
+  // turn the chunks of size n into the decoded version
+  var lastDecoded = decoded[decoded.length-1];
+  decoded = decoded.map(chunk => {
+    return '' + pad(powerMod(chunk, d.value, n.value), n.value.length);
   })
-  return result;
+  // the last element can be less than n.length, so it shouldn't be padded
+  decoded[decoded.length-1] = powerMod(lastDecoded, d.value, n.value);
+  console.log('decoded:', decoded);
+
+  // turn the decoded chunks into one string and split it into size 3
+  decodedStr = decoded.join('');
+  var ascii = [];
+  for (var i = 0; i < decodedStr.length; i += 3) {
+    var sub = decodedStr.substring(i, i + 3);
+    var char = String.fromCharCode(sub);
+    console.log('sub:', sub, 'char:', char);
+    ascii.push(char);
+  }
+
+  console.log('mapped ascii:', ascii);
+  return ascii.join('');
 }
 
 function generateRandomPrime(min, max) {
@@ -128,7 +172,6 @@ function generateRandomPrime(min, max) {
 
   while (rand <= max) {
     if (isPrime(rand)) {
-      console.log('found random prime', rand);
       return rand;
     } else if (rand == max) {
       rand = Math.floor(Math.random() * (max - min + 1)) + min;
@@ -353,7 +396,7 @@ edButton.onclick = function(event) {
     isValidState = false;
   }
   if ( (e.value * d.value) % z.value != 1) {
-    errorMessage(parentForm, '(E*D) mod Z != 1');
+    errorMessage(parentForm, '\((E*D) \mod Z != 1\)');
     isValidState = false;
   }
 
