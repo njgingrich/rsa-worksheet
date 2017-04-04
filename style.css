@@ -13,3 +13,31 @@ body {
 form {
   padding-bottom: 20vh;
 }
+
+@keyframes spinner {
+  to {transform: rotate(360deg);}
+}
+ 
+.spinner {
+  display: none;
+  position: relative;
+  margin: 15px 5px 0 20px;
+  border: 2px solid transparent;
+  border-radius: 5px;
+}
+
+.spinner:before {
+  content: '';
+  box-sizing: border-box;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin-top: -10px;
+  margin-left: -10px;
+  border-radius: 50%;
+  border: 2px solid #ccc;
+  border-top-color: #333;
+  animation: spinner .6s linear infinite;
+}

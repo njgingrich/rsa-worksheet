@@ -23,7 +23,7 @@
               <label for="p-input" class="control-label">P:</label>
               <div class="input-group">
                 <span class="input-group-btn">
-                  <button class="btn btn-secondary" type="button" id="p-random">Random</button>
+                  <button class="btn btn-default" type="button" id="p-random">Random</button>
                 </span>
                 <input type="text" class="form-control" id="p-input">
               </div>
@@ -33,7 +33,7 @@
               <label for="q-input" class="control-label">Q:</label>
               <div class="input-group">
                 <span class="input-group-btn">
-                  <button class="btn btn-secondary" type="button" id="q-random">Random</button>
+                  <button class="btn btn-default" type="button" id="q-random">Random</button>
                 </span>
                 <input type="text" class="form-control" id="q-input">
               </div>
@@ -41,7 +41,8 @@
             </div>
             <div class="col-sm-12 form-group form-control-feedback"></div>
             <div class="col-sm-12 form-group">
-              <button type="button" class="btn btn-default" id="pq-button">Set P and Q</button>
+              <button type="button" class="btn btn-primary" id="pq-button">Set P and Q</button>
+              <div class="spinner" id="pq-spinner"></div>
             </div>
           </div>
           
@@ -90,7 +91,8 @@
             <input type="text" class="form-control" id="k-input"/>
           </div>
           <div class="form-group">
-            <button class="btn btn-default" type="button" id="factors-button">Generate Factors</button>
+            <button class="btn btn-primary" type="button" id="factors-button">Generate Factors</button>
+            <div class="spinner" id="factor-spinner"></div>
           </div>
           <div class="form-group">
             <label for="factors-input" class="control-label">Factors of K</label>
@@ -122,7 +124,7 @@
             </div>
             <div class="col-sm-12 form-group form-control-feedback"></div>
             <div class="col-sm-12 form-group">
-              <button class="btn btn-default" type="button" id="ed-button">Check E and D</button>
+              <button class="btn btn-primary" type="button" id="ed-button">Check E and D</button>
             </div>
           </div>
         </fieldset>
@@ -145,7 +147,8 @@
             </p>
           </div>
           <div class="form-group">
-            <button class="btn btn-default" type="button" id="msg-plaintext-btn">Encode</button>
+            <button class="btn btn-primary" type="button" id="msg-plaintext-btn">Encode</button>
+            <div class="spinner" id="encode-spinner"></div>
           </div>         
           <div class="form-group">
             <label for="msg-ascii">ASCII encoded message:</label>

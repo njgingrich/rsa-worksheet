@@ -301,61 +301,75 @@ qRandButton.onclick = function() {
  */
 var pqButton = document.getElementById('pq-button');
 pqButton.onclick = function(event) {
-  var parentForm = document.getElementById('pq-form');
-  var pForm = document.getElementById('p-form');
-  var qForm = document.getElementById('q-form');
-  var isValidState = true;
-  clearMessages(parentForm);
-  clearMessages(pForm);
-  clearMessages(qForm);
+  pqButton.classList.add('active');
+  document.getElementById('pq-spinner').style.display = 'inline';
+  // We need to force the UI to update before it runs the calculations,
+  // so setting a 15ms wait before the calculations runs allows the
+  // ui to update first.
+  setTimeout(() => {
+    var parentForm = document.getElementById('pq-form');
+    var pForm = document.getElementById('p-form');
+    var qForm = document.getElementById('q-form');
+    var isValidState = true;
+    clearMessages(parentForm);
+    clearMessages(pForm);
+    clearMessages(qForm);
 
-  if (p.value == "") {
-    errorMessage(pForm, "No value for P.");
-    isValidState = false;
-  }
-  if (q.value == "") {
-    errorMessage(qForm, "No value for Q.");
-    isValidState = false;
-  }
-  if (!isPrime(p.value)) {
-    errorMessage(pForm, "P must be prime.");
-    isValidState = false;
-  }
-  if (!isPrime(q.value)) {
-    errorMessage(qForm, "Q must be prime.");
-    isValidState = false;
-  }
-  if (p.value == q.value) {
-    errorMessage(qForm, "P cannot equal Q.");
-    isValidState = false;
-  }
-  if (!isValidState) {
-    return;
-  }
-  // Generate N
-  n.value = p.value * q.value;
-  // Generate Z
-  z.value = (p.value - 1) * (q.value - 1);
+    if (p.value == "") {
+      errorMessage(pForm, "No value for P.");
+      isValidState = false;
+    }
+    if (q.value == "") {
+      errorMessage(qForm, "No value for Q.");
+      isValidState = false;
+    }
+    if (!isPrime(p.value)) {
+      errorMessage(pForm, "P must be prime.");
+      isValidState = false;
+    }
+    if (!isPrime(q.value)) {
+      errorMessage(qForm, "Q must be prime.");
+      isValidState = false;
+    }
+    if (p.value == q.value) {
+      errorMessage(qForm, "P cannot equal Q.");
+      isValidState = false;
+    }
+    if (!isValidState) {
+      return;
+    }
 
-  successMessage(pForm, 'P is prime.');
-  successMessage(qForm, 'Q is prime.');
+    // Generate N
+    n.value = p.value * q.value;
+    // Generate Z
+    z.value = (p.value - 1) * (q.value - 1);
 
-  // Will override the success border, but leave the success message.
-  if (n.value < 255) {
-    warningMessage(parentForm, "Warning: N < 255, so some ASCII encoding will not work.");
-  }
-  if ( (n.value * n.value) > Number.MAX_SAFE_INTEGER) {
-    warningMessage(parentForm, "Warning: N > sqrt(" + Number.MAX_SAFE_INTEGER + "), so some calculations may overflow.");
-  }
+    successMessage(pForm, 'P is prime.');
+    successMessage(qForm, 'Q is prime.');
 
-  // Generate candidates for e*d % z = 1
-  var valid = generateCandidates(z.value);
-  var modTextArea = document.getElementById('mod-candidates');
-  modTextArea.value = "";
-  for (var k = 0; k < valid.length; k++) {
-    modTextArea.value = modTextArea.value + valid[k] + ", ";
-  }
-  modTextArea.value = modTextArea.value.substr(0, modTextArea.value.length-2);
+    // Will override the success border, but leave the success message.
+    if (n.value < 255) {
+      warningMessage(parentForm, "Warning: N < 255, so some ASCII encoding will not work.");
+    }
+    if ( (n.value * n.value) > Number.MAX_SAFE_INTEGER) {
+      warningMessage(parentForm, "Warning: N > sqrt(" + Number.MAX_SAFE_INTEGER + "), so some calculations may overflow.");
+    }
+
+    // Generate candidates for e*d % z = 1
+    var valid = generateCandidates(z.value);
+    var modTextArea = document.getElementById('mod-candidates');
+    modTextArea.value = "";
+    for (var k = 0; k < valid.length; k++) {
+      modTextArea.value = modTextArea.value + valid[k] + ", ";
+    }
+    modTextArea.value = modTextArea.value.substr(0, modTextArea.value.length-2);
+
+    if (pqButton.className.includes('active')) {
+      console.log('pqbutton has active');
+    }
+    pqButton.classList.remove('active');
+    document.getElementById('pq-spinner').style.display = 'none';
+  }, 15);
 }
 
 /**
@@ -363,14 +377,19 @@ pqButton.onclick = function(event) {
  */
 var factorButton = document.getElementById('factors-button');
 factorButton.onclick = function(event) {
-  var factors = factor(k.value);
-  var result = "";
-  for (var i = 0; i < factors.length; i++) {
-    result += factors[i] + ", ";
+  factorButton.classList.add('active');
+  document.getElementById('factor-spinner').style.display = 'inline';
+  setTimeout(() => {
+    var factors = factor(k.value);
+    var result = "";
+    for (var i = 0; i < factors.length; i++) {
+      result += factors[i] + ", ";
+    }
+    result = result.substr(0, result.length - 2)
+    document.getElementById('factors-input').value = result;
+    document.getElementById('factor-spinner').style.display = 'none';
+  }, 15);
   }
-  result = result.substr(0, result.length - 2)
-  document.getElementById('factors-input').value = result;
-}
 
 /**
  * Check if the values put into E and D are valid. They need to each
@@ -430,31 +449,37 @@ edButton.onclick = function(event) {
  */
 var plainTextButton = document.getElementById('msg-plaintext-btn');
 plainTextButton.onclick = function(event) {
-  var plainTextArea = document.getElementById('msg-plaintext');
-  var asciiTextArea = document.getElementById('msg-ascii');
-  var encodedTextArea = document.getElementById('msg-encoded');
-  var decryptedTextArea = document.getElementById('msg-decrypted');
-  var ascii = asciiEncode(plainTextArea.value);
-  var result = "";
-  for (var i = 0; i < ascii.length; i++) {
-    result += ascii[i] + " ";
-  }
-  asciiTextArea.value = result;
-  setHeight(asciiTextArea);
-  var encoded = encryptText(ascii);
-  encodedTextArea.value = encoded.join('');
-  setHeight(encodedTextArea);
-  var decrypted = decryptText(encoded);
-  decryptedTextArea.value = decrypted;
-  setHeight(decryptedTextArea);
 
-  // Check the result
-  clearMessages(document.getElementById('decrypted-form'));
-  if (plainTextArea.value != decryptedTextArea.value) {
-    errorMessage(document.getElementById('decrypted-form'), 'Decrpted message does not match original.');
-  } else {
-    successMessage(document.getElementById('decrypted-form'), 'The decrypted message matches the original.');
-  }
+  factorButton.classList.add('active');
+  document.getElementById('encode-spinner').style.display = 'inline';
+  setTimeout(() => {
+    var plainTextArea = document.getElementById('msg-plaintext');
+    var asciiTextArea = document.getElementById('msg-ascii');
+    var encodedTextArea = document.getElementById('msg-encoded');
+    var decryptedTextArea = document.getElementById('msg-decrypted');
+    var ascii = asciiEncode(plainTextArea.value);
+    var result = "";
+    for (var i = 0; i < ascii.length; i++) {
+      result += ascii[i] + " ";
+    }
+    asciiTextArea.value = result;
+    setHeight(asciiTextArea);
+    var encoded = encryptText(ascii);
+    encodedTextArea.value = encoded.join('');
+    setHeight(encodedTextArea);
+    var decrypted = decryptText(encoded);
+    decryptedTextArea.value = decrypted;
+    setHeight(decryptedTextArea);
+
+    // Check the result
+    clearMessages(document.getElementById('decrypted-form'));
+    if (plainTextArea.value != decryptedTextArea.value) {
+      errorMessage(document.getElementById('decrypted-form'), 'Decrpted message does not match original.');
+    } else {
+      successMessage(document.getElementById('decrypted-form'), 'The decrypted message matches the original.');
+    }
+    document.getElementById('encode-spinner').style.display = 'inline';
+  }, 15);
 }
 
 /**
