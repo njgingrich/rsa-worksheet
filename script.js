@@ -121,6 +121,23 @@ function decryptText(arr) {
   return result;
 }
 
+function generateRandomPrime(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  var rand = Math.floor(Math.random() * (max - min + 1)) + min;
+
+  while (rand <= max) {
+    if (isPrime(rand)) {
+      console.log('found random prime', rand);
+      return rand;
+    } else if (rand == max) {
+      rand = Math.floor(Math.random() * (max - min + 1)) + min;
+    } else {
+      rand++;
+    }
+  }
+}
+
 /**
  * When the various inputs change, the validation states should
  * be cleared until rechecked with their corresponding button.
@@ -205,6 +222,16 @@ function sendMessage(formNode, message, messageType) {
       notes.innerHTML += message + '<br />';
     }        
   }
+}
+
+
+var pRandButton = document.getElementById('p-random');
+pRandButton.onclick = function() {
+  p.value = generateRandomPrime(1000, 5000);
+}
+var qRandButton = document.getElementById('q-random');
+qRandButton.onclick = function() {
+  q.value = generateRandomPrime(1000, 5000);
 }
 
 /**
