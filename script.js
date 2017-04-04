@@ -6,7 +6,6 @@ var p = document.getElementById('p-input');
 var q = document.getElementById('q-input');
 var z = document.getElementById('z-input');
 
-
 /* temp */
 p.value = 1423;
 q.value = 1361;
@@ -114,12 +113,14 @@ function encryptText(ascii) {
   // merge the ascii into one string and split it into strings of length n.length
   var encodedStr = ascii.join('');
   var encoded = [];
-  for (var i = 0; i < encodedStr.length; i += n.value.length) {
-    encoded.push(encodedStr.substring(i, i + n.value.length));
+  for (var i = 0; i < encodedStr.length; i += n.value.length-1) {
+    encoded.push(encodedStr.substring(i, i + n.value.length-1));
   }
   console.log('merged ascii', encoded);
   encoded = encoded.map((s) => {
-    return '' + pad(powerMod(s, e.value, n.value), n.value.length);
+    console.log(powerMod(s, e.value, n.value), n.value.length-1);
+    console.log('n.length = ', n.value.length-1);
+    return '' + pad(powerMod(s, e.value, n.value), n.value.length-1);
   })
   encodedTextArea.value = encoded.join('');
   return encoded;
@@ -136,19 +137,15 @@ function decryptText(arr) {
   console.log('encoded:', arr);
   var decoded = [];
 
-  // turn the encoded string into chunks of size n
-  var encodedStr = arr.join('');
-  for (var i = 0; i < encodedStr.length; i += n.value.length) {
-    decoded.push(encodedStr.substring(i, i + n.value.length));
-  }
-
-  // turn the chunks of size n into the decoded version
-  var lastDecoded = decoded[decoded.length-1];
-  decoded = decoded.map(chunk => {
-    return '' + pad(powerMod(chunk, d.value, n.value), n.value.length);
+  // decode each element of the encrypted array
+  var lastEncoded = arr[arr.length-1];
+  arr.forEach(el => {
+    console.log(pad(powerMod(el, d.value, n.value), n.value.length-1))
+    decoded.push(pad(powerMod(el, d.value, n.value), n.value.length-1));
   })
+  
   // the last element can be less than n.length, so it shouldn't be padded
-  decoded[decoded.length-1] = powerMod(lastDecoded, d.value, n.value);
+  decoded[decoded.length-1] = powerMod(lastEncoded, d.value, n.value);
   console.log('decoded:', decoded);
 
   // turn the decoded chunks into one string and split it into size 3
