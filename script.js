@@ -152,7 +152,7 @@ function isPrime(num) {
  * Take a string of input and turn it into an array of ASCII
  * numbers representing each character.
  * @param {String} text - The input string.
- * @returns {string[]} The output array of ASCII values.
+ * @returns {string[]} The output array of ASCII values padded to length 3.
  */
 function asciiEncode(text) {
   const chars = []
