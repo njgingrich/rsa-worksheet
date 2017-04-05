@@ -225,18 +225,6 @@ q.oninput = () => {
  * @param {HTMLElement} node - The DOM node to clear messages from.
  */
 function clearMessages(node) {
-  /*
-  for (let i = 0; i < node.childNodes.length; i++) {
-    if (node.childNodes[i].className !== undefined &&
-        node.childNodes[i].className.includes('form-control-feedback')) {
-      const notes = node.childNodes[i]
-      node.className = node.className.replace('has-danger', '')
-      node.className = node.className.replace('has-warning', '')
-      notes.innerHTML = ''
-    }
-  }
-  */
-
   node.childNodes.forEach((n) => {
     if (n.classList !== undefined &&
         n.classList.contains('form-control-feedback')) {
