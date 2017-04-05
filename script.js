@@ -35,7 +35,7 @@ function powerMod(base, exp, mod) {
 
 /**
  * Take an array of ASCII values and encode them using RSA. Split the ASCII
- * string into lengths of size n, then encrypt that string.
+ * string into lengths of size n-1, then encrypt that string.
  * @param {string[]} ascii - The ASCII value array.
  * @returns {string[]} The encoded ASCII array.
  */
@@ -304,7 +304,7 @@ document.getElementById('q-random').onclick = () => q.value = generateRandomPrim
  */
 const pqButton = document.getElementById('pq-button')
 pqButton.onclick = () => {
-  setActive(pqButton, 'pq-spinner', () => {
+  activateForCalc(pqButton, 'pq-spinner', () => {
     // We need to force the UI to update before it runs the calculations,
     // so setting a 15ms wait before the calculations runs allows the
     // ui to update first.
@@ -316,34 +316,16 @@ pqButton.onclick = () => {
     clearMessages(pForm)
     clearMessages(qForm)
 
-    if (p.value === '') {
-      errorMessage(pForm, 'No value for P.')
-      isValidState = false
-    }
-    if (q.value === '') {
-      errorMessage(qForm, 'No value for Q.')
-      isValidState = false
-    }
-    if (isNaN(p.value)) {
-      errorMessage(pForm, 'P must be a number.')
-      isValidState = false
-    }
-    if (isNaN(q.value)) {
-      errorMessage(qForm, 'Q must be a number.')
-      isValidState = false
-    }
-    if (!isPrime(p.value)) {
-      errorMessage(pForm, 'P must be prime.')
-      isValidState = false
-    }
-    if (!isPrime(q.value)) {
-      errorMessage(qForm, 'Q must be prime.')
-      isValidState = false
-    }
-    if (p.value === q.value) {
-      errorMessage(qForm, 'P cannot equal Q.')
-      isValidState = false
-    }
+    isValidState = validate([
+      { 'cmp': () => { return p.value === ''},      'node': pForm, 'str': 'No value for P.' },
+      { 'cmp': () => { return q.value === ''},      'node': qForm, 'str': 'No value for Q.' },
+      { 'cmp': () => { return isNaN(p.value)},      'node': pForm, 'str': 'P must be a number.' },
+      { 'cmp': () => { return isNaN(q.value)},      'node': qForm, 'str': 'Q must be a number.' },
+      { 'cmp': () => { return !isPrime(p.value)},   'node': pForm, 'str': 'P must be prime.' },
+      { 'cmp': () => { return !isPrime(q.value)},   'node': qForm, 'str': 'Q must be prime.' },
+      { 'cmp': () => { return p.value === q.value}, 'node': pForm, 'str': 'P cannot equal Q.' },
+      { 'cmp': () => { return p.value === q.value}, 'node': qForm, 'str': 'P cannot equal Q.' },
+    ])
     if (!isValidState) {
       document.getElementById('pq-spinner').style.display = 'none'
       return
@@ -369,13 +351,6 @@ pqButton.onclick = () => {
     const valid = generateCandidates(z.value)
     const modTextArea = document.getElementById('mod-candidates')
     modTextArea.value = valid.join(', ')
-    /*
-    modTextArea.value = ''
-    for (let k = 0; k < valid.length; k++) {
-      modTextArea.value = modTextArea.value + valid[k] + ', '
-    }
-    modTextArea.value = modTextArea.value.substr(0, modTextArea.value.length - 2)
-    */
 
     pqButton.classList.remove('active')
     document.getElementById('pq-spinner').style.display = 'none'
@@ -387,21 +362,11 @@ pqButton.onclick = () => {
  */
 const factorButton = document.getElementById('factors-button')
 factorButton.onclick = () => {
-  factorButton.classList.add('active')
-  document.getElementById('factor-spinner').style.display = 'inline'
-  setTimeout(() => {
+  activateForCalc(factorButton, 'factor-spinner', () => {
     var factors = factor(k.value)
-    /*
-    var result = ''
-    for (var i = 0; i < factors.length; i++) {
-      result += factors[i] + ", "
-    }
-    result = result.substr(0, result.length - 2)
-    document.getElementById('factors-input').value = result
-    */
     document.getElementById('factors-input').value = factors.join(', ')
     document.getElementById('factor-spinner').style.display = 'none'
-  }, 15)
+  })
 }
 
 /**
@@ -417,43 +382,22 @@ edButton.onclick = () => {
   clearMessages(parentForm)
   clearMessages(eForm)
   clearMessages(dForm)
-
-  if (e.value === '') {
-    errorMessage(eForm, 'No value for E.')
-    isValidState = false
-  }
-  if (d.value === '') {
-    errorMessage(dForm, 'No value for D.')
-    isValidState = false
-  }
-  const eFactors = factor(e.value)
-  const dFactors = factor(d.value)
-
   /*
   * Check if e and d have any similar factors by factoring them
   * and seeing if the returned arrays have any factors in common.
   */
+  const eFactors = factor(e.value)
+  const dFactors = factor(d.value)
   let filtered = []
-  /*
-  for (let i = 0; i < eFactors.length; i++) {
-    if (dFactors.indexOf(eFactors[i]) >= 0) {
-      filtered.push(eFactors[i])
-    }
-  }
-  */
-  // let's try it
-  filtered = eFactors.map((e) => {
+  filtered = eFactors.filter((e) => {
     return dFactors.indexOf(e) >= 0
   })
-  if (filtered.length > 0) {
-    errorMessage(parentForm, 'E and D are not relatively prime.')
-    isValidState = false
-  }
-  if ( (e.value * d.value) % z.value !== 1) {
-    errorMessage(parentForm, '\((E*D) \mod Z != 1\)')
-    isValidState = false
-  }
-
+  isValidState = validate([
+    { 'cmp': () => { return e.value === ''}, 'node': eForm, 'str': 'No value for E.' },
+    { 'cmp': () => { return d.value === ''}, 'node': dForm, 'str': 'No value for D.' },
+    { 'cmp': () => { return filtered.length > 0}, 'node': parentForm, 'str': 'E and D are not relatively prime.' },
+    { 'cmp': () => { return (e.value * d.value) % z.value !== 1}, 'node': parentForm, 'str': '\((E*D) \mod Z != 1\)' },
+  ])
   if (!isValidState) {
     return
   }
@@ -470,7 +414,7 @@ edButton.onclick = () => {
  */
 const plainTextButton = document.getElementById('msg-plaintext-btn')
 plainTextButton.onclick = () => {
-  setActive(plainTextButton, 'encode-spinner', () => {
+  activateForCalc(plainTextButton, 'encode-spinner', () => {
     const plainTextArea = document.getElementById('msg-plaintext')
     const asciiTextArea = document.getElementById('msg-ascii')
     const encodedTextArea = document.getElementById('msg-encoded')
@@ -509,13 +453,13 @@ function setHeight(node) {
 }
 
 /**
- * Active a button with a spinner.
+ * Active a button with a spinner while doing a calculation.
  * @param {HTMLElement} node - The button to apply the active style to.
  * @param {String} spinnerId - The ID of the spinner to activate.
  * @param {Function} callback - The callback function to run once the UI 
  *                              has been updated.
  */
-function setActive(node, spinnerId, callback) {
+function activateForCalc(node, spinnerId, callback) {
   node.classList.add('active')
   document.getElementById(spinnerId).style.display = 'inline'
   setTimeout(() => {
@@ -532,4 +476,15 @@ function setActive(node, spinnerId, callback) {
 function setInactive(node, spinnerId) {
   node.classList.remove('active')
   document.getElementById(spinnerId).style.display = 'none'
+}
+
+function validate(validations) {
+  let toReturn = true
+  for (const val of validations) {
+    if(val.cmp()) {
+      errorMessage(val.node, val.str)
+      toReturn = false
+    }
+  }
+  return toReturn
 }
