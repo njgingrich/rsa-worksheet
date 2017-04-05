@@ -351,9 +351,8 @@ pqButton.onclick = () => {
 const factorButton = document.getElementById('factors-button')
 factorButton.onclick = () => {
   activateForCalc(factorButton, 'factor-spinner', () => {
-    var factors = factor(k.value)
+    const factors = factor(k.value)
     document.getElementById('factors-input').value = factors.join(', ')
-    document.getElementById('factor-spinner').style.display = 'none'
   })
 }
 
