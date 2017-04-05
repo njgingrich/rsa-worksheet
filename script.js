@@ -80,9 +80,7 @@ function decryptText(arr) {
   const decodedStr = decoded.join('')
   const ascii = []
   for (let i = 0; i < decodedStr.length; i += 3) {
-    const sub = decodedStr.substring(i, i + 3)
-    const char = String.fromCharCode(sub)
-    ascii.push(char)
+    ascii.push(String.fromCharCode(decodedStr.substring(i, i + 3)))
   }
 
   return ascii.join('')
@@ -143,7 +141,7 @@ function isPrime(num) {
     return false
   }
   const stop = Math.sqrt(num)
-  for(var i = 2; i < stop; i++)
+  for(let i = 2; i < stop; i++)
     if(num % i === 0) {
       return false
     }
@@ -160,8 +158,7 @@ function asciiEncode(text) {
   const chars = []
   for (let i = 0; i < text.length; i++) {
     var ch = '' + text.charCodeAt(i)
-    ch = ('000' + ch).substring(ch.length)
-    chars.push(ch)
+    chars.push(('000' + ch).substring(ch.length))
   }
   return chars
 }
@@ -228,6 +225,7 @@ q.oninput = () => {
  * @param {HTMLElement} node - The DOM node to clear messages from.
  */
 function clearMessages(node) {
+  /*
   for (let i = 0; i < node.childNodes.length; i++) {
     if (node.childNodes[i].className !== undefined &&
         node.childNodes[i].className.includes('form-control-feedback')) {
@@ -235,8 +233,16 @@ function clearMessages(node) {
       node.className = node.className.replace('has-danger', '')
       node.className = node.className.replace('has-warning', '')
       notes.innerHTML = ''
-    }        
+    }
   }
+  */
+
+  node.childNodes.forEach((n) => {
+    if (n.classList.includes('form-control-feedback')) {
+      n.classList.remove('has-danger')
+      n.classList.remove('has-warning')
+    }
+  })
 }
 
 /**
@@ -275,6 +281,7 @@ function successMessage(formNode, message) {
  *                               'has-success', 'has-warning', 'has-danger'.
  */
 function sendMessage(formNode, message, messageType) {
+  /*
   for (let i = 0; i < formNode.childNodes.length; i++) {
     if (formNode.childNodes[i].className !== undefined &&
         formNode.childNodes[i].className.includes('form-control-feedback')) {
@@ -285,17 +292,19 @@ function sendMessage(formNode, message, messageType) {
       notes.innerHTML += message + '<br />'
     }        
   }
+  */
+
+  formNode.childNodes.forEach((n) => {
+    if (n.classList.includes('form-control-feedback')) {
+      n.classList.add('has-danger')
+      n.classList.add('has-warning')
+      n.innerHTML += message + '<br />'
+    }
+  })
 }
 
-
-const pRandButton = document.getElementById('p-random')
-pRandButton.onclick = () => {
-  p.value = generateRandomPrime(1000, 5000)
-}
-const qRandButton = document.getElementById('q-random')
-qRandButton.onclick = () => {
-  q.value = generateRandomPrime(1000, 5000)
-}
+document.getElementById('p-random').onclick = () => p.value = generateRandomPrime(1000, 5000)
+document.getElementById('q-random').onclick = () => q.value = generateRandomPrime(1000, 5000)
 
 /**
  * Check the input values for P and Q and see if they are valid.
@@ -462,8 +471,7 @@ edButton.onclick = () => {
  */
 const plainTextButton = document.getElementById('msg-plaintext-btn')
 plainTextButton.onclick = () => {
-
-  factorButton.classList.add('active')
+  plainTextButton.classList.add('active')
   document.getElementById('encode-spinner').style.display = 'inline'
   setTimeout(() => {
     const plainTextArea = document.getElementById('msg-plaintext')
@@ -475,11 +483,11 @@ plainTextButton.onclick = () => {
     asciiTextArea.value = ascii.join(' ')
     setHeight(asciiTextArea)
 
-    var encoded = encryptText(ascii)
+    const encoded = encryptText(ascii)
     encodedTextArea.value = encoded.join('')
     setHeight(encodedTextArea)
 
-    var decrypted = decryptText(encoded)
+    const decrypted = decryptText(encoded)
     decryptedTextArea.value = decrypted
     setHeight(decryptedTextArea)
 
