@@ -33,6 +33,10 @@
                     "info"
                 ]
             }
+        ],
+        "eqeqeq": [
+            "error", 
+            "always"
         ]
     }
 }

@@ -24,7 +24,7 @@ function powerMod(base, exp, mod) {
   }
   let result = 1
   while (exp > 0) {
-    if ((exp % 2) == 1) {
+    if ((exp % 2) === 1) {
       result = (result * base) % mod
     }
     base = (base * base) % mod
@@ -110,7 +110,7 @@ function pad(value, length) {
 function generateCandidates(z) {
   const valid = []
   for (let i = 2; valid.length < 30 && i < Number.MAX_SAFE_INTEGER; i++) {
-    if (i % z == 1) {
+    if (i % z === 1) {
       valid.push(i)
     }
   }
@@ -126,7 +126,7 @@ function generateCandidates(z) {
 function factor(k) {
   const factors = []
   for (let i = 2; i <= k; i++) {
-    if (k % i == 0) {
+    if (k % i === 0) {
       factors.push(i)
     }
   }
@@ -139,7 +139,7 @@ function factor(k) {
  * @returns {Boolean} 
  */
 function isPrime(num) {
-  if (num == '') {
+  if (num === '') {
     return false
   }
   const stop = Math.sqrt(num)
@@ -180,7 +180,7 @@ function generateRandomPrime(min, max) {
   while (rand <= max) {
     if (isPrime(rand)) {
       return rand
-    } else if (rand == max) {
+    } else if (rand === max) {
       rand = Math.floor(Math.random() * (max - min + 1)) + min
     } else {
       rand++
@@ -229,7 +229,7 @@ q.oninput = () => {
  */
 function clearMessages(node) {
   for (let i = 0; i < node.childNodes.length; i++) {
-    if (node.childNodes[i].className != undefined &&
+    if (node.childNodes[i].className !== undefined &&
         node.childNodes[i].className.includes('form-control-feedback')) {
       const notes = node.childNodes[i]
       node.className = node.className.replace('has-danger', '')
@@ -276,7 +276,7 @@ function successMessage(formNode, message) {
  */
 function sendMessage(formNode, message, messageType) {
   for (let i = 0; i < formNode.childNodes.length; i++) {
-    if (formNode.childNodes[i].className != undefined &&
+    if (formNode.childNodes[i].className !== undefined &&
         formNode.childNodes[i].className.includes('form-control-feedback')) {
       const notes = formNode.childNodes[i]
       if (!formNode.className.includes(messageType)) {
@@ -319,11 +319,11 @@ pqButton.onclick = () => {
     clearMessages(pForm)
     clearMessages(qForm)
 
-    if (p.value == '') {
+    if (p.value === '') {
       errorMessage(pForm, 'No value for P.')
       isValidState = false
     }
-    if (q.value == '') {
+    if (q.value === '') {
       errorMessage(qForm, 'No value for Q.')
       isValidState = false
     }
@@ -335,7 +335,7 @@ pqButton.onclick = () => {
       errorMessage(qForm, 'Q must be prime.')
       isValidState = false
     }
-    if (p.value == q.value) {
+    if (p.value === q.value) {
       errorMessage(qForm, 'P cannot equal Q.')
       isValidState = false
     }
@@ -412,11 +412,11 @@ edButton.onclick = () => {
   clearMessages(eForm)
   clearMessages(dForm)
 
-  if (e.value == '') {
+  if (e.value === '') {
     errorMessage(eForm, 'No value for E.')
     isValidState = false
   }
-  if (d.value == '') {
+  if (d.value === '') {
     errorMessage(dForm, 'No value for D.')
     isValidState = false
   }
@@ -443,7 +443,7 @@ edButton.onclick = () => {
     errorMessage(parentForm, 'E and D are not relatively prime.')
     isValidState = false
   }
-  if ( (e.value * d.value) % z.value != 1) {
+  if ( (e.value * d.value) % z.value !== 1) {
     errorMessage(parentForm, '\((E*D) \mod Z != 1\)')
     isValidState = false
   }
@@ -485,7 +485,7 @@ plainTextButton.onclick = () => {
 
     // Check the result
     clearMessages(document.getElementById('decrypted-form'))
-    if (plainTextArea.value != decryptedTextArea.value) {
+    if (plainTextArea.value !== decryptedTextArea.value) {
       errorMessage(document.getElementById('decrypted-form'), 'Decrpted message does not match original.')
     } else {
       successMessage(document.getElementById('decrypted-form'), 'The decrypted message matches the original.')
