@@ -7,7 +7,7 @@ const q = document.getElementById('q-input')
 const z = document.getElementById('z-input')
 
 //============================================================
-// RSA Functions.
+// To be completed.
 //============================================================
 
 /**
@@ -19,18 +19,7 @@ const z = document.getElementById('z-input')
  * @returns {Number} The result of the operation.
  */
 function powerMod(base, exp, mod) {
-  if ((base < 1) || (exp < 0) || (mod < 1)) {
-    return -1
-  }
-  let result = 1
-  while (exp > 0) {
-    if ((exp % 2) === 1) {
-      result = (result * base) % mod
-    }
-    base = (base * base) % mod
-    exp = Math.floor(exp / 2)
-  }
-  return result
+  
 }
 
 /**
@@ -41,19 +30,11 @@ function powerMod(base, exp, mod) {
  */
 function encryptText(ascii) {
   // merge the ascii into one string and split it into strings of length(n) - 1
-  const encodedStr = ascii.join('')
-  let encoded = []
-  for (let i = 0; i < encodedStr.length; i += n.value.length - 1) {
-    encoded.push(encodedStr.substring(i, i + n.value.length - 1))
-  }
+  
 
   // for each chunk, encrypt it using the formula encrypted = (chunk)^E mod N.
   // This should be implemented using the powerMod() function.
-  encoded = encoded.map((s) => {
-    return powerMod(s, e.value, n.value)
-  })
-
-  return encoded
+  
 }
 
 /**
@@ -63,27 +44,15 @@ function encryptText(ascii) {
  * @returns {String} The decoded string
  */
 function decryptText(arr) {
-  const decoded = []
-
   // Decode each element of the encrypted array.
   // The last element may be less than length(n) - 1, so it's powerMod() should
   // be calculated separately.
-  const lastEncoded = arr[arr.length - 1]
-  arr.forEach(el => {
-    decoded.push(pad(powerMod(el, d.value, n.value), n.value.length - 1))
-  })
+  
   // the last element can be less than n.length, so it shouldn't be padded
-  decoded[decoded.length - 1] = powerMod(lastEncoded, d.value, n.value)
-
+  
   // Turn the decoded chunks into one string and split it into size 3, and
   // convert it back into ASCII.
-  const decodedStr = decoded.join('')
-  const ascii = []
-  for (let i = 0; i < decodedStr.length; i += 3) {
-    ascii.push(String.fromCharCode(decodedStr.substring(i, i + 3)))
-  }
-
-  return ascii.join('')
+  
 }
 
 //============================================================
