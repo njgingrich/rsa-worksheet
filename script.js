@@ -238,9 +238,12 @@ function clearMessages(node) {
   */
 
   node.childNodes.forEach((n) => {
-    if (n.classList.includes('form-control-feedback')) {
-      n.classList.remove('has-danger')
-      n.classList.remove('has-warning')
+    if (n.classList !== undefined &&
+        n.classList.contains('form-control-feedback')) {
+      node.classList.remove('has-danger')
+      node.classList.remove('has-warning')
+      node.classList.remove('has-success')
+      n.innerHTML = ''
     }
   })
 }
@@ -281,23 +284,10 @@ function successMessage(formNode, message) {
  *                               'has-success', 'has-warning', 'has-danger'.
  */
 function sendMessage(formNode, message, messageType) {
-  /*
-  for (let i = 0; i < formNode.childNodes.length; i++) {
-    if (formNode.childNodes[i].className !== undefined &&
-        formNode.childNodes[i].className.includes('form-control-feedback')) {
-      const notes = formNode.childNodes[i]
-      if (!formNode.className.includes(messageType)) {
-        formNode.className += ' ' + messageType
-      }
-      notes.innerHTML += message + '<br />'
-    }        
-  }
-  */
-
   formNode.childNodes.forEach((n) => {
-    if (n.classList.includes('form-control-feedback')) {
-      n.classList.add('has-danger')
-      n.classList.add('has-warning')
+    if (n.classList !== undefined &&
+        n.classList.contains('form-control-feedback')) {
+      formNode.classList.add(messageType)
       n.innerHTML += message + '<br />'
     }
   })
@@ -314,12 +304,10 @@ document.getElementById('q-random').onclick = () => q.value = generateRandomPrim
  */
 const pqButton = document.getElementById('pq-button')
 pqButton.onclick = () => {
-  pqButton.classList.add('active')
-  document.getElementById('pq-spinner').style.display = 'inline'
-  // We need to force the UI to update before it runs the calculations,
-  // so setting a 15ms wait before the calculations runs allows the
-  // ui to update first.
-  setTimeout(() => {
+  setActive(pqButton, 'pq-spinner', () => {
+    // We need to force the UI to update before it runs the calculations,
+    // so setting a 15ms wait before the calculations runs allows the
+    // ui to update first.
     const parentForm = document.getElementById('pq-form')
     const pForm = document.getElementById('p-form')
     const qForm = document.getElementById('q-form')
@@ -336,6 +324,14 @@ pqButton.onclick = () => {
       errorMessage(qForm, 'No value for Q.')
       isValidState = false
     }
+    if (isNaN(p.value)) {
+      errorMessage(pForm, 'P must be a number.')
+      isValidState = false
+    }
+    if (isNaN(q.value)) {
+      errorMessage(qForm, 'Q must be a number.')
+      isValidState = false
+    }
     if (!isPrime(p.value)) {
       errorMessage(pForm, 'P must be prime.')
       isValidState = false
@@ -349,6 +345,7 @@ pqButton.onclick = () => {
       isValidState = false
     }
     if (!isValidState) {
+      document.getElementById('pq-spinner').style.display = 'none'
       return
     }
 
@@ -382,7 +379,7 @@ pqButton.onclick = () => {
 
     pqButton.classList.remove('active')
     document.getElementById('pq-spinner').style.display = 'none'
-  }, 30)
+  })
 }
 
 /**
@@ -457,7 +454,9 @@ edButton.onclick = () => {
     isValidState = false
   }
 
-  if (!isValidState) return
+  if (!isValidState) {
+    return
+  }
 
   successMessage(eForm, 'E is relatively prime to Z.')
   successMessage(dForm, 'D is relatively prime to Z.')
@@ -471,9 +470,7 @@ edButton.onclick = () => {
  */
 const plainTextButton = document.getElementById('msg-plaintext-btn')
 plainTextButton.onclick = () => {
-  plainTextButton.classList.add('active')
-  document.getElementById('encode-spinner').style.display = 'inline'
-  setTimeout(() => {
+  setActive(plainTextButton, 'encode-spinner', () => {
     const plainTextArea = document.getElementById('msg-plaintext')
     const asciiTextArea = document.getElementById('msg-ascii')
     const encodedTextArea = document.getElementById('msg-encoded')
@@ -499,7 +496,7 @@ plainTextButton.onclick = () => {
       successMessage(document.getElementById('decrypted-form'), 'The decrypted message matches the original.')
     }
     document.getElementById('encode-spinner').style.display = 'none'
-  }, 30)
+  })
 }
 
 /**
@@ -509,4 +506,30 @@ plainTextButton.onclick = () => {
 function setHeight(node) {
   node.style.height = '20px'
   node.style.height = (node.scrollHeight + 10) + 'px'
+}
+
+/**
+ * Active a button with a spinner.
+ * @param {HTMLElement} node - The button to apply the active style to.
+ * @param {String} spinnerId - The ID of the spinner to activate.
+ * @param {Function} callback - The callback function to run once the UI 
+ *                              has been updated.
+ */
+function setActive(node, spinnerId, callback) {
+  node.classList.add('active')
+  document.getElementById(spinnerId).style.display = 'inline'
+  setTimeout(() => {
+    callback()
+    setInactive(node, spinnerId)
+  }, 30)
+}
+
+/**
+ * Deactivate a button and its spinner once the calculation has completed.
+ * @param {HTMLElement} node 
+ * @param {String} spinnerId 
+ */
+function setInactive(node, spinnerId) {
+  node.classList.remove('active')
+  document.getElementById(spinnerId).style.display = 'none'
 }
