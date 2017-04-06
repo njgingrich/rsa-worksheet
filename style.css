@@ -14,6 +14,10 @@ form {
   padding-bottom: 20vh;
 }
 
+.mono-form {
+  font: 1.1em monospace;
+}
+
 @keyframes spinner {
   to {transform: rotate(360deg);}
 }

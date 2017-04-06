@@ -283,8 +283,8 @@ function sendMessage(formNode, message, messageType) {
   })
 }
 
-document.getElementById('p-random').onclick = () => p.value = generateRandomPrime(1000, 5000)
-document.getElementById('q-random').onclick = () => q.value = generateRandomPrime(1000, 5000)
+document.getElementById('p-random').onclick = () => p.value = generateRandomPrime(1000, 3000)
+document.getElementById('q-random').onclick = () => q.value = generateRandomPrime(1000, 3000)
 
 /**
  * Check the input values for P and Q and see if they are valid.
@@ -401,9 +401,9 @@ edButton.onclick = () => {
  * in another, and the decrypted plaintext (using the encrypted ASCII) is
  * displayed in a third box.
  */
-const plainTextButton = document.getElementById('msg-plaintext-btn')
-plainTextButton.onclick = () => {
-  activateForCalc(plainTextButton, 'encode-spinner', () => {
+const encodeButton = document.getElementById('encode-button')
+encodeButton.onclick = () => {
+  activateForCalc(encodeButton, 'encode-spinner', () => {
     const plainTextArea = document.getElementById('msg-plaintext')
     const asciiTextArea = document.getElementById('msg-ascii')
     const encodedTextArea = document.getElementById('msg-encoded')
@@ -415,12 +415,15 @@ plainTextButton.onclick = () => {
     const encoded = encryptText(ascii)
     encodedTextArea.value = encoded.join('')
     setHeight(encodedTextArea)
+
+    // set the default decryption value to D
+    document.getElementById('decode-input').value = d.value
   })
 }
 
 const decodeButton = document.getElementById('decode-button')
 decodeButton.onclick = () => {
-  activateForCalc(plainTextButton, 'decode-spinner', () => {
+  activateForCalc(encodeButton, 'decode-spinner', () => {
     const decodeInput = document.getElementById('decode-input')
     const plainTextArea = document.getElementById('msg-plaintext')
     const encodedTextArea = document.getElementById('msg-encoded')
