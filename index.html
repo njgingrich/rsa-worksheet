@@ -155,8 +155,33 @@
             <textarea class="form-control" id="msg-ascii" rows=5 cols=80></textarea>
           </div>
           <div class="form-group">
+            <p>
+              To encrypt the string, it is first converted into its ASCII representation. This
+              string is then concatenated and split into chunks length \(length(N) - 1\). Each
+              of those has the encryption function run on it, then the chunks are concatenated.
+            </p>
+          </div>
+          <div class="form-group">
             <label for="msg-encoded">Encrypted Message: (\(encrypted = char^E \mod N)\)</label>
             <textarea class="form-control" id="msg-encoded" rows=5 cols=80></textarea>
+          </div>
+          <div class="form-group">
+            <p>
+              Then, to decode, the private key D found earlier is used on the string, 
+              reversing the above process - the encrypted message is split back into chunks
+              of size \(length(N) - 1\), and each of those is decrypted. Then, the resulting
+              string is turned back into its separate ASCII values.
+            </p>
+          </div>
+          <div class="form-group form-inline">
+            <div class="form-group">
+              <label for="e-input" class="control-label mr-sm-2">Value to Decode With</label>
+              <input type="text" class="form-control mr-sm-2" id="decode-input">
+            </div>
+            <div class="form-group">
+              <button class="btn btn-primary mr-sm-2" type="button" id="decode-button">Decrypt</button>
+              <div class="spinner mr-sm-2" id="decode-spinner"></div>
+            </div>
           </div>
           <div class="form-group" id="decrypted-form">
             <label for="msg-decrypted">Decoded Message: (\(decrypted = char^D \mod N)\)</label>

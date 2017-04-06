@@ -48,9 +48,10 @@ function encryptText(ascii) {
   }
 
   // for each chunk, encrypt it using the formula encrypted = (chunk)^E mod N.
-  // This should be implemented using the powerMod() function.
+  // This should be implemented using the powerMod() function, and padded to length(N)
+  // so the right length can be decrypted.
   encoded = encoded.map((s) => {
-    return powerMod(s, e.value, n.value)
+    return '' + pad(powerMod(s, e.value, n.value), n.value.length)
   })
 
   return encoded
@@ -59,10 +60,11 @@ function encryptText(ascii) {
 /**
  * Decrypt the passed-in ASCII numbers and return a string from the
  * decoded ASCII.
- * @param {int[]} arr - The array of encrypted ASCII numbers to decrypt.
+ * @param {Number[]} arr - The array of encrypted ASCII numbers to decrypt.
+ * @param {Number} d - The private key D to use to decrypt.
  * @returns {String} The decoded string
  */
-function decryptText(arr) {
+function decryptText(arr, d) {
   const decoded = []
 
   // Decode each element of the encrypted array.
@@ -70,10 +72,10 @@ function decryptText(arr) {
   // be calculated separately.
   const lastEncoded = arr[arr.length - 1]
   arr.forEach(el => {
-    decoded.push(pad(powerMod(el, d.value, n.value), n.value.length - 1))
+    decoded.push(pad(powerMod(el, d, n.value), n.value.length - 1))
   })
   // the last element can be less than n.length, so it shouldn't be padded
-  decoded[decoded.length - 1] = powerMod(lastEncoded, d.value, n.value)
+  decoded[decoded.length - 1] = powerMod(lastEncoded, d, n.value)
 
   // Turn the decoded chunks into one string and split it into size 3, and
   // convert it back into ASCII.
@@ -405,7 +407,6 @@ plainTextButton.onclick = () => {
     const plainTextArea = document.getElementById('msg-plaintext')
     const asciiTextArea = document.getElementById('msg-ascii')
     const encodedTextArea = document.getElementById('msg-encoded')
-    const decryptedTextArea = document.getElementById('msg-decrypted')
     const ascii = asciiEncode(plainTextArea.value)
     
     asciiTextArea.value = ascii.join(' ')
@@ -414,8 +415,24 @@ plainTextButton.onclick = () => {
     const encoded = encryptText(ascii)
     encodedTextArea.value = encoded.join('')
     setHeight(encodedTextArea)
+  })
+}
 
-    const decrypted = decryptText(encoded)
+const decodeButton = document.getElementById('decode-button')
+decodeButton.onclick = () => {
+  activateForCalc(plainTextButton, 'decode-spinner', () => {
+    const decodeInput = document.getElementById('decode-input')
+    const plainTextArea = document.getElementById('msg-plaintext')
+    const encodedTextArea = document.getElementById('msg-encoded')
+    const decryptedTextArea = document.getElementById('msg-decrypted')
+    // Take the encrypted input and convert it into chunks length(N)-1
+    const encryptedStr = encodedTextArea.value
+    const encoded = []
+    for (let i = 0; i < encryptedStr.length; i += n.value.length) {
+      encoded.push(encryptedStr.substring(i, i + n.value.length))
+    }
+
+    const decrypted = decryptText(encoded, decodeInput.value)
     decryptedTextArea.value = decrypted
     setHeight(decryptedTextArea)
 
@@ -426,7 +443,6 @@ plainTextButton.onclick = () => {
     } else {
       successMessage(document.getElementById('decrypted-form'), 'The decrypted message matches the original.')
     }
-    document.getElementById('encode-spinner').style.display = 'none'
   })
 }
 
